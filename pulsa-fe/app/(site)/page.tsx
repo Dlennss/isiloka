@@ -149,11 +149,11 @@ export default async function GuestHomePage() {
       <Script id="homepage-faq-jsonld" type="application/ld+json">
         {JSON.stringify(faqJsonLd)}
       </Script>
-      <div className="space-y-4 px-4 pt-4">
-        <GuestCategoryGrid items={categories} />
+      <div className="space-y-3 px-3 pt-3">
         <Suspense fallback={<GuestAdsCarouselSkeleton />}>
           <GuestAdsSection />
         </Suspense>
+        <GuestCategoryGrid items={categories} />
         <UserRecentActivity href="/kategori" />
         <UserFavoriteTransactions href="/kategori" />
         <UserMonthlyBills href="/listrik/tagihan" />

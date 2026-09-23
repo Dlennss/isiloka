@@ -57,8 +57,8 @@ export function GuestAdsCarousel({ items }: GuestAdsCarouselProps) {
   const touchStartXRef = useRef<number | null>(null);
   const touchDeltaXRef = useRef(0);
   const safeActiveIndex = ads.length > 0 ? Math.min(activeIndex, ads.length - 1) : 0;
-  const peekSize = viewportWidth >= 768 ? 32 : 12;
-  const slideGap = viewportWidth >= 768 ? 10 : 8;
+  const peekSize = viewportWidth >= 768 ? 24 : 0;
+  const slideGap = viewportWidth >= 768 ? 10 : 0;
   const slideWidth = Math.max(0, viewportWidth - (ads.length > 1 ? peekSize * 2 : 0));
   const trackOffset = ads.length > 1 ? safeActiveIndex * (slideWidth + slideGap) : 0;
 
@@ -127,7 +127,7 @@ export function GuestAdsCarousel({ items }: GuestAdsCarouselProps) {
   return (
     <section
       ref={viewportRef}
-      className="relative overflow-hidden rounded-[22px] border border-white/75 bg-white shadow-[0_16px_34px_rgba(6,78,59,0.12)] ring-1 ring-emerald-950/[0.04] [touch-action:pan-y]"
+      className="relative overflow-hidden rounded-[18px] border border-sky-100 bg-white shadow-[0_16px_38px_rgba(15,56,104,0.08)] [touch-action:pan-y]"
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -146,7 +146,7 @@ export function GuestAdsCarousel({ items }: GuestAdsCarouselProps) {
           const hasCaption = Boolean(item.judul || item.keterangan);
           const content = (
             <div
-              className="relative aspect-[19/9] shrink-0 overflow-hidden rounded-[18px] bg-emerald-50"
+              className="relative aspect-[19/9] shrink-0 overflow-hidden rounded-[16px] bg-sky-50"
               style={{ width: slideWidth > 0 ? `${slideWidth}px` : "100%" }}
             >
               <img
