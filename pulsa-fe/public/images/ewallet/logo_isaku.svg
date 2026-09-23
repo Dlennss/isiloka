@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="i.saku">
+  <rect width="120" height="120" rx="28" fill="#ffffff"/>
+  <circle cx="60" cy="47" r="25" fill="#fff1f2"/>
+  <path fill="#ef4444" d="M45 32h30v9H55v10h17v9H55v18H45V32Z"/>
+  <circle cx="78" cy="35" r="6" fill="#ef4444"/>
+  <text x="60" y="91" text-anchor="middle" font-family="Arial, sans-serif" font-size="15" font-weight="800" fill="#ef4444">i.saku</text>
+</svg>

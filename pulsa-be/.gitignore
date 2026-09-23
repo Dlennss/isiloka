@@ -1,0 +1,28 @@
+# secrets
+.env
+.env.*
+!.env-example
+!.env.example
+*.key
+*.pem
+*.p12
+*.crt
+
+# build output
+pulsa2
+*.exe
+*.out
+pulsa-be
+
+# runtime data
+scrape_out/
+*.log
+log/
+log.txt
+
+# editor/OS
+.DS_Store
+.vscode/
+.idea/
+
+.gocache/

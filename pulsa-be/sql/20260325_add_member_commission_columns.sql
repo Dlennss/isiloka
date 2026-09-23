@@ -1,0 +1,5 @@
+ALTER TABLE public.member
+  ADD COLUMN IF NOT EXISTS retail_agent_commission_rp BIGINT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS retail_master_commission_rp BIGINT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS h2h_agent_commission_rp BIGINT NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS h2h_master_commission_rp BIGINT NOT NULL DEFAULT 0;

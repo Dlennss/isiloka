@@ -1,0 +1,8 @@
+<svg width="440" height="280" viewBox="0 0 440 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="440" height="280" rx="28" fill="#0f172a"/>
+  <path d="M0 0h440v280H0z" fill="url(#g)"/>
+  <path d="M69 64h226l-64 82 104-14-141 96 47-73-94 12 76-77-154-26Z" fill="#facc15"/>
+  <path d="M74 58h246l-70 88 116-14-164 112 51-79-101 13 83-84-161-36Z" stroke="#fff" stroke-width="8" opacity=".9"/>
+  <text x="220" y="235" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="40" font-weight="900" fill="white">FREE FIRE MAX</text>
+  <defs><linearGradient id="g" x1="0" x2="440" y1="0" y2="280"><stop stop-color="#581c87"/><stop offset=".52" stop-color="#dc2626"/><stop offset="1" stop-color="#facc15"/></linearGradient></defs>
+</svg>

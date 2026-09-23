@@ -1,0 +1,13 @@
+[Unit]
+Description=Refresh P24 admin provider analytics cache
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=pulsakilat
+Group=deployers
+WorkingDirectory=/home/syarif/app/releases/pulsa-be/current
+Environment=P24_PROVIDER_ANALYTICS_CACHE_DAYS_BACK=1
+ExecStart=/home/syarif/app/releases/pulsa-be/current/scripts/refresh_admin_provider_analytics_cache.sh
+Nice=5

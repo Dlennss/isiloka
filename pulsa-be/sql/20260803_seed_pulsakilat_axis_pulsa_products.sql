@@ -1,0 +1,154 @@
+-- Seed produk pulsa AXIS dari daftar provider.
+-- Aman dijalankan berulang: produk lama AXIS generik dinonaktifkan, SKU baru di-upsert.
+
+INSERT INTO public.brand (nama, aktif, dibuat_pada, diubah_pada)
+SELECT 'AXIS', true, now(), now()
+WHERE NOT EXISTS (
+  SELECT 1 FROM public.brand WHERE lower(trim(nama)) = 'axis'
+);
+
+UPDATE public.produk p
+SET aktif = false, diubah_pada = now()
+FROM public.kategori k, public.brand b
+WHERE p.kategori_id = k.id
+  AND p.brand_id = b.id
+  AND lower(trim(k.nama)) = 'pulsa'
+  AND lower(trim(b.nama)) = 'axis'
+  AND p.sku LIKE 'PK-PULSA-AXIS-%';
+
+WITH seed(category_name, brand_name, sku, product_name, group_name, nominal, harga) AS (
+  VALUES
+    ('Pulsa','AXIS','AXM10','Axis XL Promo 10.000','AXIS XL REGULER PROMO',10000,11780),
+    ('Pulsa','AXIS','AXM15','Axis XL Promo 15.000','AXIS XL REGULER PROMO',15000,15945),
+    ('Pulsa','AXIS','AXM150','Axis XL Promo 150.000','AXIS XL REGULER PROMO',150000,150850),
+    ('Pulsa','AXIS','AXM200','Axis XL Promo 200.000','AXIS XL REGULER PROMO',200000,200650),
+    ('Pulsa','AXIS','AXM25','Axis XL Promo 25.000','AXIS XL REGULER PROMO',25000,25955),
+    ('Pulsa','AXIS','AXM30','Axis XL Promo 30.000','AXIS XL REGULER PROMO',30000,30950),
+    ('Pulsa','AXIS','AXM300','Axis XL Promo 300.000','AXIS XL REGULER PROMO',300000,300700),
+    ('Pulsa','AXIS','AXM40','Axis XL Promo 40.000','AXIS XL REGULER PROMO',40000,41010),
+    ('Pulsa','AXIS','AXM5','Axis XL Promo 5.000','AXIS XL REGULER PROMO',5000,6815),
+    ('Pulsa','AXIS','AXM500','Axis XL Promo 500.000','AXIS XL REGULER PROMO',500000,500500),
+    ('Pulsa','AXIS','AXM60','Axis XL Promo 60.000','AXIS XL REGULER PROMO',60000,61010),
+    ('Pulsa','AXIS','AXM70','Axis XL Promo 70.000','AXIS XL REGULER PROMO',70000,71010),
+    ('Pulsa','AXIS','AXM80','Axis XL Promo 80.000','AXIS XL REGULER PROMO',80000,81010),
+    ('Pulsa','AXIS','AXM90','Axis XL Promo 90.000','AXIS XL REGULER PROMO',90000,91010),
+
+    ('Pulsa','AXIS','AXS10','AXIS XL REGULER VIP 10K DETIKAN','AXIS XL REGULER VIP',10000,11900),
+    ('Pulsa','AXIS','AXS100','AXIS XL REGULER VIP 100K DETIKAN','AXIS XL REGULER VIP',100000,101150),
+    ('Pulsa','AXIS','AXS1000','AXIS XL REGULER VIP 1000K DETIKAN','AXIS XL REGULER VIP',1000000,1003000),
+    ('Pulsa','AXIS','AXS15','AXIS XL REGULER VIP 15K DETIKAN','AXIS XL REGULER VIP',15000,16100),
+    ('Pulsa','AXIS','AXS150','AXIS XL REGULER VIP 150K DETIKAN','AXIS XL REGULER VIP',150000,151250),
+    ('Pulsa','AXIS','AXS200','AXIS XL REGULER VIP 200K DETIKAN','AXIS XL REGULER VIP',200000,201300),
+    ('Pulsa','AXIS','AXS25','AXIS XL REGULER VIP 25K DETIKAN','AXIS XL REGULER VIP',25000,26100),
+    ('Pulsa','AXIS','AXS30','AXIS XL REGULER VIP 30K DETIKAN','AXIS XL REGULER VIP',30000,31100),
+    ('Pulsa','AXIS','AXS300','AXIS XL REGULER VIP 300K DETIKAN','AXIS XL REGULER VIP',300000,301500),
+    ('Pulsa','AXIS','AXS40','AXIS XL REGULER VIP 40K DETIKAN','AXIS XL REGULER VIP',40000,41030),
+    ('Pulsa','AXIS','AXS5','AXIS XL REGULER VIP 5K DETIKAN','AXIS XL REGULER VIP',5000,6900),
+    ('Pulsa','AXIS','AXS50','AXIS XL REGULER VIP 50K DETIKAN','AXIS XL REGULER VIP',50000,51100),
+    ('Pulsa','AXIS','AXS500','AXIS XL REGULER VIP 500K DETIKAN','AXIS XL REGULER VIP',500000,501800),
+    ('Pulsa','AXIS','AXS60','AXIS XL REGULER VIP 60K DETIKAN','AXIS XL REGULER VIP',60000,61010),
+    ('Pulsa','AXIS','AXS70','AXIS XL REGULER VIP 70K DETIKAN','AXIS XL REGULER VIP',70000,71010),
+    ('Pulsa','AXIS','AXS80','AXIS XL REGULER VIP 80K DETIKAN','AXIS XL REGULER VIP',80000,81010),
+    ('Pulsa','AXIS','AXS90','AXIS XL REGULER VIP 90K DETIKAN','AXIS XL REGULER VIP',90000,91010),
+
+    ('Pulsa','AXIS','AXVR10','AXIS XL REGULER STANDAR 10K','AXIS XL REGULER STANDAR',10000,11850),
+    ('Pulsa','AXIS','AXVR100','AXIS XL REGULER STANDAR 100K','AXIS XL REGULER STANDAR',100000,100750),
+    ('Pulsa','AXIS','AXVR1000','AXIS XL REGULER STANDAR 1000K','AXIS XL REGULER STANDAR',1000000,999300),
+    ('Pulsa','AXIS','AXVR15','AXIS XL REGULER STANDAR 15K','AXIS XL REGULER STANDAR',15000,15950),
+    ('Pulsa','AXIS','AXVR150','AXIS XL REGULER STANDAR 150K','AXIS XL REGULER STANDAR',150000,150950),
+    ('Pulsa','AXIS','AXVR200','AXIS XL REGULER STANDAR 200K','AXIS XL REGULER STANDAR',200000,200800),
+    ('Pulsa','AXIS','AXVR25','AXIS XL REGULER STANDAR 25K','AXIS XL REGULER STANDAR',25000,25960),
+    ('Pulsa','AXIS','AXVR30','AXIS XL REGULER STANDAR 30K','AXIS XL REGULER STANDAR',30000,30960),
+    ('Pulsa','AXIS','AXVR300','AXIS XL REGULER STANDAR 300K','AXIS XL REGULER STANDAR',300000,300850),
+    ('Pulsa','AXIS','AXVR40','AXIS XL REGULER STANDAR 40K','AXIS XL REGULER STANDAR',40000,41020),
+    ('Pulsa','AXIS','AXVR5','AXIS XL REGULER STANDAR 5K','AXIS XL REGULER STANDAR',5000,6850),
+    ('Pulsa','AXIS','AXVR50','AXIS XL REGULER STANDAR 50K','AXIS XL REGULER STANDAR',50000,50985),
+    ('Pulsa','AXIS','AXVR500','AXIS XL REGULER STANDAR 500K','AXIS XL REGULER STANDAR',500000,500800),
+    ('Pulsa','AXIS','AXVR60','AXIS XL REGULER STANDAR 60K','AXIS XL REGULER STANDAR',60000,61020),
+    ('Pulsa','AXIS','AXVR70','AXIS XL REGULER STANDAR 70K','AXIS XL REGULER STANDAR',70000,71020),
+    ('Pulsa','AXIS','AXVR80','AXIS XL REGULER STANDAR 80K','AXIS XL REGULER STANDAR',80000,81020),
+    ('Pulsa','AXIS','AXVR90','AXIS XL REGULER STANDAR 90K','AXIS XL REGULER STANDAR',90000,91020),
+
+    ('Pulsa','AXIS','YAXT10','XL AXIS TRANSFER 10K','XL AXIS PULSA TRANSFER',10000,11670),
+    ('Pulsa','AXIS','YAXT100','XL AXIS TRANSFER 100K','XL AXIS PULSA TRANSFER',100000,101880),
+    ('Pulsa','AXIS','YAXT125','XL AXIS TRANSFER 125K','XL AXIS PULSA TRANSFER',125000,126130),
+    ('Pulsa','AXIS','YAXT15','XL AXIS TRANSFER 15K','XL AXIS PULSA TRANSFER',15000,16520),
+    ('Pulsa','AXIS','YAXT150','XL AXIS TRANSFER 150K','XL AXIS PULSA TRANSFER',150000,150380),
+    ('Pulsa','AXIS','YAXT175','XL AXIS TRANSFER 175K','XL AXIS PULSA TRANSFER',175000,174630),
+    ('Pulsa','AXIS','YAXT20','XL AXIS TRANSFER 20K','XL AXIS PULSA TRANSFER',20000,21370),
+    ('Pulsa','AXIS','YAXT200','XL AXIS TRANSFER 200K','XL AXIS PULSA TRANSFER',200000,198880),
+    ('Pulsa','AXIS','YAXT25','XL AXIS TRANSFER 25K','XL AXIS PULSA TRANSFER',25000,26705),
+    ('Pulsa','AXIS','YAXT30','XL AXIS TRANSFER 30K','XL AXIS PULSA TRANSFER',30000,31555),
+    ('Pulsa','AXIS','YAXT35','XL AXIS TRANSFER 35K','XL AXIS PULSA TRANSFER',35000,36405),
+    ('Pulsa','AXIS','YAXT40','XL AXIS TRANSFER 40K','XL AXIS PULSA TRANSFER',40000,41255),
+    ('Pulsa','AXIS','YAXT45','XL AXIS TRANSFER 45K','XL AXIS PULSA TRANSFER',45000,46105),
+    ('Pulsa','AXIS','YAXT5','XL AXIS TRANSFER 5K','XL AXIS PULSA TRANSFER',5000,6820),
+    ('Pulsa','AXIS','YAXT50','XL AXIS TRANSFER 50K','XL AXIS PULSA TRANSFER',50000,51440),
+    ('Pulsa','AXIS','YAXT55','XL AXIS TRANSFER 55K','XL AXIS PULSA TRANSFER',55000,56290),
+    ('Pulsa','AXIS','YAXT60','XL AXIS TRANSFER 60K','XL AXIS PULSA TRANSFER',60000,61140),
+    ('Pulsa','AXIS','YAXT65','XL AXIS TRANSFER 65K','XL AXIS PULSA TRANSFER',65000,65990),
+    ('Pulsa','AXIS','YAXT70','XL AXIS TRANSFER 70K','XL AXIS PULSA TRANSFER',70000,70840),
+    ('Pulsa','AXIS','YAXT75','XL AXIS TRANSFER 75K','XL AXIS PULSA TRANSFER',75000,75690),
+    ('Pulsa','AXIS','YAXT80','XL AXIS TRANSFER 80K','XL AXIS PULSA TRANSFER',80000,80540),
+    ('Pulsa','AXIS','YAXT85','XL AXIS TRANSFER 85K','XL AXIS PULSA TRANSFER',85000,85390),
+    ('Pulsa','AXIS','YAXT90','XL AXIS TRANSFER 90K','XL AXIS PULSA TRANSFER',90000,90240),
+    ('Pulsa','AXIS','YAXT95','XL AXIS TRANSFER 95K','XL AXIS PULSA TRANSFER',95000,95090)
+),
+upsert_products AS (
+  INSERT INTO public.produk
+    (sku, nama, group_name, kategori_id, brand_id, tipe_harga, nominal, aktif, dibuat_pada, diubah_pada)
+  SELECT
+    seed.sku,
+    seed.product_name,
+    seed.group_name,
+    k.id,
+    b.id,
+    'FIXED',
+    seed.nominal,
+    true,
+    now(),
+    now()
+  FROM seed
+  JOIN public.kategori k ON lower(trim(k.nama)) = lower(trim(seed.category_name))
+  JOIN public.brand b ON lower(trim(b.nama)) = lower(trim(seed.brand_name))
+  ON CONFLICT (sku) DO UPDATE SET
+    nama = EXCLUDED.nama,
+    group_name = EXCLUDED.group_name,
+    kategori_id = EXCLUDED.kategori_id,
+    brand_id = EXCLUDED.brand_id,
+    tipe_harga = EXCLUDED.tipe_harga,
+    nominal = EXCLUDED.nominal,
+    aktif = true,
+    diubah_pada = now()
+  RETURNING id, sku
+)
+INSERT INTO public.produk_app_pricing
+  (produk_id, provider, harga, harga_dasar, fee_user, fee_agent, fee_master, harga_user, harga_agent, harga_master, aktif, created_at, updated_at, dibuat_pada, diubah_pada)
+SELECT
+  p.id,
+  'yuscom',
+  seed.harga,
+  seed.harga,
+  0,
+  0,
+  0,
+  seed.harga,
+  seed.harga,
+  seed.harga,
+  true,
+  now(),
+  now(),
+  now(),
+  now()
+FROM seed
+JOIN upsert_products p ON p.sku = seed.sku
+ON CONFLICT (produk_id) DO UPDATE SET
+  provider = EXCLUDED.provider,
+  harga = EXCLUDED.harga,
+  harga_dasar = EXCLUDED.harga_dasar,
+  harga_user = EXCLUDED.harga_user,
+  harga_agent = EXCLUDED.harga_agent,
+  harga_master = EXCLUDED.harga_master,
+  aktif = true,
+  updated_at = now(),
+  diubah_pada = now();

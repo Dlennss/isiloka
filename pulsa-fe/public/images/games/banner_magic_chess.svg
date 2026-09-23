@@ -1,0 +1,10 @@
+<svg width="440" height="280" viewBox="0 0 440 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="440" height="280" rx="28" fill="#1a1038"/>
+  <circle cx="348" cy="70" r="120" fill="#22c55e" opacity=".26"/>
+  <circle cx="74" cy="220" r="110" fill="#a3e635" opacity=".2"/>
+  <path d="M102 84h236l-32 112H134L102 84Z" fill="#fff7ed" opacity=".94"/>
+  <path d="m141 101 38 72 39-72 39 72 42-72-24 90H164l-23-90Z" fill="#7c3aed"/>
+  <circle cx="219" cy="73" r="31" fill="#facc15"/>
+  <text x="220" y="231" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="33" font-weight="900" fill="white">MAGIC CHESS</text>
+  <text x="220" y="255" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="800" fill="#a3e635">GO GO</text>
+</svg>

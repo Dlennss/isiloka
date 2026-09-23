@@ -1,0 +1,10 @@
+<svg width="440" height="280" viewBox="0 0 440 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="440" height="280" rx="28" fill="#fefce8"/>
+  <path d="M0 0h440v95H0z" fill="#a3e635"/>
+  <circle cx="220" cy="115" r="64" fill="#facc15"/>
+  <circle cx="198" cy="105" r="10" fill="#111827"/>
+  <circle cx="242" cy="105" r="10" fill="#111827"/>
+  <path d="M190 138c18 18 43 18 61 0" stroke="#111827" stroke-width="12" stroke-linecap="round"/>
+  <path d="M180 79h80v18h-80zM211 48h18v80h-18z" fill="#111827"/>
+  <text x="220" y="228" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="52" font-weight="900" fill="#111827">HAGO</text>
+</svg>

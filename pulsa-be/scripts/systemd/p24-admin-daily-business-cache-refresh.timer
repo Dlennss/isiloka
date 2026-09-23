@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh P24 admin daily business cache at 00:01 WIB
+
+[Timer]
+OnCalendar=*-*-* 00:01:00
+AccuracySec=1min
+Persistent=true
+Unit=p24-admin-daily-business-cache-refresh.service
+
+[Install]
+WantedBy=timers.target

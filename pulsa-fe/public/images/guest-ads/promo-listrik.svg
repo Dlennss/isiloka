@@ -1,0 +1,30 @@
+<svg width="1600" height="760" viewBox="0 0 1600 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="760" rx="36" fill="url(#bg)"/>
+  <circle cx="1336" cy="96" r="162" fill="#FDE68A" fill-opacity=".26"/>
+  <circle cx="1456" cy="588" r="210" fill="#3F6212" fill-opacity=".18"/>
+  <text x="92" y="126" fill="#FEF3C7" font-family="Arial, sans-serif" font-size="28" font-weight="700">Isiloka</text>
+  <text x="92" y="248" fill="white" font-family="Arial, sans-serif" font-size="72" font-weight="800">Token Listrik &amp;</text>
+  <text x="92" y="326" fill="white" font-family="Arial, sans-serif" font-size="72" font-weight="800">Tagihan Rumah Tangga</text>
+  <text x="92" y="394" fill="#FEF9C3" font-family="Arial, sans-serif" font-size="34">Token listrik, BPJS, dan pembayaran bulanan lain lebih gampang dicari dalam satu alur.</text>
+  <g>
+    <rect x="92" y="462" width="228" height="78" rx="24" fill="#FFFFFF" fill-opacity=".15"/>
+    <text x="136" y="511" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="800">Token PLN</text>
+    <rect x="338" y="462" width="150" height="78" rx="24" fill="#FFFFFF" fill-opacity=".14"/>
+    <text x="375" y="511" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="800">BPJS</text>
+    <rect x="506" y="462" width="160" height="78" rx="24" fill="#FFFFFF" fill-opacity=".14"/>
+    <text x="552" y="511" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="800">PDAM</text>
+  </g>
+  <g>
+    <rect x="1012" y="170" width="444" height="420" rx="36" fill="#365314" fill-opacity=".28" stroke="white" stroke-opacity=".14" stroke-width="2"/>
+    <path d="M1176 238L1114 354H1180L1144 460L1272 316H1190L1248 238H1176Z" fill="#FDE047"/>
+    <rect x="1060" y="464" width="348" height="84" rx="28" fill="#FFFFFF" fill-opacity=".14"/>
+    <text x="1102" y="517" fill="white" font-family="Arial, sans-serif" font-size="32" font-weight="800">PROMO • STANDAR • FULL REPLY</text>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="92" y1="82" x2="1498" y2="706" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15803D"/>
+      <stop offset=".48" stop-color="#65A30D"/>
+      <stop offset="1" stop-color="#365314"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,33 @@
+<svg width="1600" height="760" viewBox="0 0 1600 760" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="760" rx="36" fill="url(#bg)"/>
+  <circle cx="1360" cy="84" r="160" fill="#FDE68A" fill-opacity=".22"/>
+  <circle cx="1328" cy="558" r="244" fill="#083344" fill-opacity=".24"/>
+  <text x="92" y="126" fill="#D1FAE5" font-family="Arial, sans-serif" font-size="28" font-weight="700">Isiloka</text>
+  <text x="92" y="248" fill="white" font-family="Arial, sans-serif" font-size="72" font-weight="800">Paket Data Harian</text>
+  <text x="92" y="326" fill="#E6FFFB" font-family="Arial, sans-serif" font-size="72" font-weight="800">&amp; Bulanan Lebih Jelas</text>
+  <text x="92" y="394" fill="#D9FDF7" font-family="Arial, sans-serif" font-size="34">Grup paket lebih rapi, judul produk lebih singkat, dan pilihan kuota lebih gampang dibandingkan.</text>
+  <g>
+    <rect x="92" y="460" width="258" height="82" rx="26" fill="#FFFFFF" fill-opacity=".16"/>
+    <text x="138" y="512" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="800">1 GB 7 Hari</text>
+    <rect x="370" y="460" width="286" height="82" rx="26" fill="#FFFFFF" fill-opacity=".14"/>
+    <text x="414" y="512" fill="white" font-family="Arial, sans-serif" font-size="34" font-weight="800">12 GB 30 Hari</text>
+  </g>
+  <g>
+    <rect x="1024" y="154" width="438" height="448" rx="34" fill="#052E3E" fill-opacity=".44" stroke="white" stroke-opacity=".14" stroke-width="2"/>
+    <rect x="1062" y="196" width="362" height="84" rx="24" fill="#FFFFFF" fill-opacity=".12"/>
+    <text x="1100" y="248" fill="#D9FDF7" font-family="Arial, sans-serif" font-size="30" font-weight="700">DATA ALL ZONE</text>
+    <rect x="1062" y="312" width="112" height="192" rx="28" fill="#FEF3C7"/>
+    <rect x="1190" y="352" width="112" height="152" rx="28" fill="#BFDBFE"/>
+    <rect x="1318" y="276" width="112" height="228" rx="28" fill="#86EFAC"/>
+    <text x="1089" y="548" fill="#7C2D12" font-family="Arial, sans-serif" font-size="30" font-weight="800">7 Hari</text>
+    <text x="1218" y="548" fill="#0C4A6E" font-family="Arial, sans-serif" font-size="30" font-weight="800">14 Hari</text>
+    <text x="1343" y="548" fill="#14532D" font-family="Arial, sans-serif" font-size="30" font-weight="800">30 Hari</text>
+  </g>
+  <defs>
+    <linearGradient id="bg" x1="110" y1="92" x2="1498" y2="710" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0F766E"/>
+      <stop offset=".55" stop-color="#0F9A94"/>
+      <stop offset="1" stop-color="#115E59"/>
+    </linearGradient>
+  </defs>
+</svg>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="MOBILE LEGEND">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#E2E8F0"/>
+      <stop offset="100%" stop-color="#CBD5E1"/>
+    </linearGradient>
+  </defs>
+  <rect width="160" height="160" rx="32" fill="url(#bg)"/>
+  <rect x="18" y="18" width="124" height="124" rx="28" fill="#ffffff" opacity="0.9"/>
+  <g transform="translate(50 28)">
+    <path d="M20 28c0-4.4 3.6-8 8-8h4c4.4 0 8 3.6 8 8 0 5.5-4.5 10-10 10h-0c-5.5 0-10-4.5-10-10Z" fill="#0F172A" opacity="0.18"/><path d="M23 30h4v-2h2v-4h-2v-2h-4v2h-2v4h2v2Zm13-4.5a2 2 0 1 0 0 .01Zm-3 5a2 2 0 1 0 0 .01Z" fill="#0F172A"/>
+  </g>
+  <rect x="28" y="104" width="104" height="28" rx="14" fill="#475569" opacity="0.14"/>
+  <text x="80" y="122" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="26" font-weight="700" fill="#0F172A">ML</text>
+</svg>

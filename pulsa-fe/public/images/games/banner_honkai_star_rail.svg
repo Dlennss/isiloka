@@ -1,0 +1,9 @@
+<svg width="440" height="280" viewBox="0 0 440 280" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="440" height="280" rx="28" fill="#312e81"/>
+  <path d="M0 0h440v280H0z" fill="url(#g)"/>
+  <circle cx="312" cy="80" r="88" fill="#f0abfc" opacity=".35"/>
+  <path d="M83 176 204 103l36-68 26 84 91 34-92 25-34 75-32-78-116 1Z" fill="#fff" opacity=".92"/>
+  <path d="m188 139 64-38-22 55 52 17-61 8-21 48-17-50-62 1 67-41Z" fill="#ec4899"/>
+  <text x="220" y="237" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="900" fill="white">HONKAI: STAR RAIL</text>
+  <defs><linearGradient id="g" x1="0" x2="440" y1="0" y2="280"><stop stop-color="#581c87"/><stop offset=".48" stop-color="#4338ca"/><stop offset="1" stop-color="#ec4899"/></linearGradient></defs>
+</svg>

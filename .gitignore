@@ -1,0 +1,45 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Frontend builds
+.next/
+out/
+build/
+coverage/
+next-env.d.ts
+*.tsbuildinfo
+
+# Backend builds and runtime files
+*.exe
+*.out
+*.log
+pulsa-be/pulsa2
+pulsa-be/scrape_out/
+pulsa-be/log/
+pulsa-be/log.txt
+
+# Environment and secrets
+.env
+.env.*
+!.env-example
+!.env.example
+!**/.env-example
+!**/.env.example
+*.key
+*.pem
+*.p12
+*.crt
+
+# Tools and editors
+.vercel/
+.gocache/
+.DS_Store
+.vscode/
+.idea/

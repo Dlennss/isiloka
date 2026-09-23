@@ -1,0 +1,597 @@
+/* app/globals.css
+   Tailwind v4 entrypoint (WAJIB)
+   - Jangan pakai @tailwind base/components/utilities di v4 untuk kasus kamu
+*/
+
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+@import "tw-animate-css";
+
+/* custom variant untuk dark mode berbasis class */
+@custom-variant dark (&:is(.dark *));
+
+/* =========================================
+   Design tokens
+   - Support shadcn variables (bg-background, text-foreground, dst)
+   - Sekaligus simpan token legacy kamu (--bg, --bg-card, --text, dst)
+   ========================================= */
+
+:root {
+  /* Legacy tokens */
+  --bg: #0b1020;
+  --bg-card: #121831;
+  --text: #e8ecf7;
+  --muted: #9aa3b2;
+  --primary: #4f7cff;
+  --border: #27304a;
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+
+  /* shadcn-style tokens (dipakai oleh class: bg-background, text-foreground, dst) */
+  --radius: 0.75rem;
+
+  /* Base surfaces */
+  --background: oklch(0.13 0.02 260);        /* gelap */
+  --foreground: oklch(0.98 0 0);             /* terang */
+
+  --card: oklch(0.16 0.02 260);
+  --card-foreground: oklch(0.98 0 0);
+
+  --popover: oklch(0.16 0.02 260);
+  --popover-foreground: oklch(0.98 0 0);
+
+  /* Brand */
+  --primary: oklch(0.72 0.15 250);
+  --primary-foreground: oklch(0.12 0.02 260);
+
+  /* Neutral */
+  --secondary: oklch(0.20 0.02 260);
+  --secondary-foreground: oklch(0.98 0 0);
+
+  --muted: oklch(0.20 0.02 260);
+  --muted-foreground: oklch(0.75 0 0);
+
+  --accent: oklch(0.22 0.03 260);
+  --accent-foreground: oklch(0.98 0 0);
+
+  --destructive: oklch(0.60 0.22 25);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Form */
+  --border: oklch(0.28 0.02 260);
+  --input: oklch(0.28 0.02 260);
+  --ring: oklch(0.65 0.08 250);
+
+  /* Optional chart colors (kalau dipakai) */
+  --chart-1: oklch(0.65 0.20 40);
+  --chart-2: oklch(0.60 0.12 185);
+  --chart-3: oklch(0.55 0.15 300);
+  --chart-4: oklch(0.70 0.18 140);
+  --chart-5: oklch(0.62 0.16 20);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+/* Kalau kamu mau mode terang juga, siapin .light (opsional) */
+.light {
+  --background: oklch(0.99 0 0);
+  --foreground: oklch(0.15 0 0);
+
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.15 0 0);
+
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.15 0 0);
+
+  --secondary: oklch(0.96 0 0);
+  --secondary-foreground: oklch(0.20 0 0);
+
+  --muted: oklch(0.96 0 0);
+  --muted-foreground: oklch(0.55 0 0);
+
+  --accent: oklch(0.96 0 0);
+  --accent-foreground: oklch(0.20 0 0);
+
+  --border: oklch(0.90 0 0);
+  --input: oklch(0.90 0 0);
+  --ring: oklch(0.70 0 0);
+}
+
+/* =========================================
+   Base resets
+   ========================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+/* Biarkan tailwind yang pegang warna melalui token shadcn */
+body {
+  /* Jangan gunakan navy sebagai fallback: pada Safari mobile warna ini terlihat
+     sesaat ketika halaman Next sedang berpindah atau melakukan hydration. */
+  background: #f0f8f8;
+  color: #13464b;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+}
+
+input[type="date"],
+input[type="month"],
+input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="month"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0;
+  filter: invert(1);
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 2.75rem;
+  height: 100%;
+  margin: 0;
+}
+
+/* Admin legacy pages still contain older dark utilities. Keep the compatibility
+   layer scoped and token-specific so hover utilities are not applied permanently. */
+.admin-dashboard-surface {
+  min-height: 100%;
+  background: #f0f8f8;
+  color: #13464b;
+}
+
+.admin-dashboard-surface :where(
+  [class~="bg-slate-950/30"], [class~="bg-slate-950/35"],
+  [class~="bg-slate-950/40"], [class~="bg-slate-950/45"],
+  [class~="bg-slate-950/50"], [class~="bg-slate-950/55"],
+  [class~="bg-slate-950/60"], [class~="bg-slate-950/70"],
+  [class~="bg-slate-950/80"], [class~="bg-slate-950/95"],
+  [class~="bg-slate-900"], [class~="bg-slate-900/40"],
+  [class~="bg-slate-900/50"], [class~="bg-slate-900/55"],
+  [class~="bg-slate-900/60"], [class~="bg-slate-900/70"],
+  [class~="bg-slate-900/80"], [class~="bg-slate-900/95"],
+  [class~="bg-zinc-900"]
+) {
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border-color: #d7e9df !important;
+}
+
+.admin-dashboard-surface :where(
+  [class*="from-slate-900"], [class*="via-slate-900"],
+  [class*="to-slate-800"]
+) {
+  background-color: #ffffff !important;
+  background-image: none !important;
+}
+
+.admin-dashboard-surface [class*="from-cyan-500/15"][class*="to-indigo-500/15"] {
+  background-color: #ecfdf5 !important;
+  background-image: none !important;
+}
+
+.admin-dashboard-surface thead[class*="from-cyan-500"] {
+  background-color: #065f46 !important;
+  background-image: none !important;
+}
+
+.admin-dashboard-surface thead[class*="from-cyan-500"] th {
+  color: #ffffff !important;
+}
+
+.admin-dashboard-surface :where(
+  [class~="bg-slate-50"], [class~="bg-slate-100"],
+  [class~="bg-slate-200"], [class~="bg-slate-700"],
+  [class~="bg-slate-800/80"]
+) {
+  background-color: #f0fdf4 !important;
+}
+
+.admin-dashboard-surface :where(
+  [class~="border-white/8"], [class~="border-white/10"],
+  [class~="border-white/12"], [class~="border-white/15"],
+  [class~="border-white/20"]
+) {
+  border-color: #d7e9df !important;
+}
+
+.admin-dashboard-surface :where(
+  [class~="text-slate-50"], [class~="text-slate-100"],
+  [class~="text-slate-200"], [class~="text-slate-300"],
+  [class~="text-slate-600"], [class~="text-slate-700"],
+  [class~="text-slate-800"], [class~="text-slate-900"],
+  [class~="text-slate-950"], [class~="text-zinc-100"]
+) {
+  color: #13464b !important;
+}
+
+.admin-dashboard-surface :where(
+  [class~="text-slate-400"], [class~="text-slate-500"],
+  [class~="text-gray-400"], [class~="text-gray-500"]
+) {
+  color: #52756b !important;
+}
+
+.admin-dashboard-surface :where(input, select, textarea)[class*="bg-slate-"] {
+  color: #13464b !important;
+  border-color: #cfe4d9 !important;
+  background: #f8fffb !important;
+  color-scheme: light;
+}
+
+.admin-dashboard-surface :where(input, textarea)::placeholder {
+  color: #78958d !important;
+}
+
+.admin-dashboard-surface :where(
+  .fixed[class~="bg-slate-950/70"],
+  .fixed[class~="bg-slate-950/75"]
+) {
+  background-color: rgba(2, 44, 34, 0.7) !important;
+  background-image: none !important;
+}
+
+/* Link */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* =========================================
+   Legacy components (scoped)
+   Diletakkan di layer components agar tidak nabrak utilities
+   ========================================= */
+
+@layer components {
+  .container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 0 16px;
+  }
+
+  .navlink {
+    padding: 6px 10px;
+    border-radius: 10px;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--primary);
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+  }
+
+  .btn.ghost {
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+
+  .btn.sm {
+    padding: 6px 10px;
+  }
+
+  .iconbtn {
+    padding: 8px 10px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+  }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 12px;
+    box-shadow: var(--shadow);
+  }
+
+  .muted {
+    color: var(--muted);
+  }
+
+  /* Komponen input legacy: class-based, tidak override global input{} */
+  .input {
+    width: 100%;
+    padding: 12px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text);
+  }
+
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+
+  .chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 4px 0;
+    margin-top: 10px;
+    scroll-snap-type: x mandatory;
+  }
+
+  .chips > * {
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+  }
+
+  .chipbtn {
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: transparent;
+    border: 1px solid var(--primary);
+    color: var(--text);
+  }
+
+  .chipbtn.active {
+    background: var(--primary);
+    color: #fff;
+  }
+
+  .filterbar {
+    display: grid;
+    gap: 10px;
+  }
+
+  .grid-prod {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  @media (min-width: 640px) {
+    .grid-prod {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 900px) {
+    .grid-prod {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+    }
+  }
+
+  .site-footer {
+    border-top: 1px solid var(--border);
+    margin-top: 32px;
+    padding: 20px 0;
+    color: var(--muted);
+  }
+
+  .cartbar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    border-top: 1px solid var(--border);
+    background: rgba(11, 16, 32, 0.85);
+    backdrop-filter: blur(8px);
+  }
+
+  .drawer {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: none;
+  }
+
+  .drawer.open {
+    display: block;
+  }
+
+  .drawer-mask {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+  }
+
+  .drawer-panel {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: min(92vw, 420px);
+    background: var(--bg);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    box-shadow: var(--shadow);
+  }
+
+  /* Pastikan nav desktop benar-benar hilang di mobile */
+  .nav-main {
+    display: none;
+  }
+
+  @media (min-width: 768px) {
+    .nav-main {
+      display: flex;
+    }
+  }
+}
+
+@layer components {
+  /* ===== Auth Modern ===== */
+  .auth-shell {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .auth-shell::before {
+    content: "";
+    position: absolute;
+    inset: -40%;
+    background:
+      radial-gradient(60% 40% at 20% 20%, color-mix(in oklab, var(--primary) 55%, transparent) 0%, transparent 60%),
+      radial-gradient(55% 40% at 80% 75%, color-mix(in oklab, var(--ring) 40%, transparent) 0%, transparent 60%);
+    filter: blur(24px);
+    opacity: 0.7;
+    pointer-events: none;
+    transform: translate3d(0,0,0);
+  }
+
+  .auth-card {
+    border: 1px solid color-mix(in oklab, var(--border) 82%, transparent);
+    background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,255,255,0.94));
+    box-shadow:
+      0 18px 45px rgba(15,23,42,0.12),
+      0 1px 0 rgba(255,255,255,0.92) inset;
+    transform: translateZ(0);
+  }
+
+  /* “Getar” halus saat muncul (bukan norak) */
+  @keyframes auth-jiggle-in {
+    0%   { opacity: 0; transform: translateY(10px) scale(0.985) rotate(-0.25deg); }
+    40%  { opacity: 1; transform: translateY(0) scale(1.0) rotate(0.18deg); }
+    70%  { transform: translateY(0) scale(1.0) rotate(-0.12deg); }
+    100% { transform: translateY(0) scale(1.0) rotate(0deg); }
+  }
+
+  .auth-jiggle {
+    animation: auth-jiggle-in 520ms cubic-bezier(.2,.9,.2,1) both;
+  }
+
+  /* Shake saat error */
+  @keyframes auth-shake {
+    0% { transform: translateX(0); }
+    15% { transform: translateX(-6px); }
+    30% { transform: translateX(6px); }
+    45% { transform: translateX(-5px); }
+    60% { transform: translateX(5px); }
+    75% { transform: translateX(-3px); }
+    100% { transform: translateX(0); }
+  }
+  .auth-shake {
+    animation: auth-shake 420ms ease-in-out;
+  }
+
+  /* Tombol timbul modern */
+  .btn-elevated {
+    position: relative;
+    border: 1px solid color-mix(in oklab, var(--primary) 35%, transparent);
+    background: linear-gradient(
+      180deg,
+      color-mix(in oklab, var(--primary) 88%, white 0%) 0%,
+      color-mix(in oklab, var(--primary) 70%, black 0%) 100%
+    );
+    box-shadow:
+      0 12px 30px color-mix(in oklab, var(--primary) 25%, transparent),
+      0 2px 0 color-mix(in oklab, #fff 18%, transparent) inset,
+      0 -10px 18px color-mix(in oklab, #000 35%, transparent) inset;
+    transition: transform 120ms ease, box-shadow 200ms ease, filter 200ms ease;
+    will-change: transform;
+  }
+
+  .btn-elevated::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(70% 120% at 50% 0%, rgba(255,255,255,.18), transparent 60%);
+    pointer-events: none;
+    opacity: 0.9;
+  }
+
+  .btn-elevated:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.04);
+    box-shadow:
+      0 16px 38px color-mix(in oklab, var(--primary) 32%, transparent),
+      0 2px 0 color-mix(in oklab, #fff 20%, transparent) inset,
+      0 -10px 18px color-mix(in oklab, #000 35%, transparent) inset;
+  }
+
+  .btn-elevated:active {
+    transform: translateY(1px);
+    filter: brightness(0.98);
+    box-shadow:
+      0 10px 22px color-mix(in oklab, var(--primary) 22%, transparent),
+      0 1px 0 color-mix(in oklab, #fff 16%, transparent) inset,
+      0 -8px 14px color-mix(in oklab, #000 38%, transparent) inset;
+  }
+
+  .btn-elevated:disabled {
+    filter: saturate(0.6) brightness(0.9);
+    box-shadow: none;
+  }
+}
+
+@layer components {
+  @keyframes pk-loader-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes pk-loader-float {
+    0%,
+    100% {
+      transform: translateY(0) scale(1);
+    }
+    50% {
+      transform: translateY(-8px) scale(1.02);
+    }
+  }
+
+  .pk-loader-ring {
+    background:
+      conic-gradient(from 0deg, #087e8b 0deg, #22c55e 86deg, transparent 87deg, transparent 220deg, #f6b49d 221deg, #087e8b 290deg, transparent 291deg),
+      radial-gradient(circle, transparent 58%, rgba(16, 185, 129, 0.12) 59%, rgba(16, 185, 129, 0.12) 70%, transparent 71%);
+    animation: pk-loader-spin 1.45s linear infinite;
+    box-shadow: 0 0 42px rgba(34, 197, 94, 0.2);
+  }
+
+  .pk-loader-orbit {
+    animation: pk-loader-float 2.4s ease-in-out infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .pk-loader-ring,
+    .pk-loader-orbit {
+      animation: none;
+    }
+  }
+}

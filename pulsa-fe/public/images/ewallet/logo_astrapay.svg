@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="AstraPay">
+  <rect width="120" height="120" rx="28" fill="#ffffff"/>
+  <circle cx="60" cy="47" r="25" fill="#eef6ff"/>
+  <path fill="#2563eb" d="M36 71h9l4-10h22l4 10h9L65 25H55L36 71Zm16-17 8-20 8 20H52Z"/>
+  <text x="60" y="91" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="800" fill="#2563eb">AstraPay</text>
+</svg>
