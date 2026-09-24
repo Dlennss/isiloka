@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { Bell, UserRound } from "lucide-react";
 
 type AppTopHeaderProps = {
   isLoggedIn?: boolean;
@@ -38,20 +39,32 @@ export function AppTopHeader({ isLoggedIn = false, userName, saldo, role }: AppT
 
         <div className="flex shrink-0 items-center gap-2">
           <Link
-            href={isLoggedIn ? "/user/transaksi" : "/transaksi"}
+            href={isLoggedIn ? "/user/transaksi" : "/login"}
             prefetch={false}
-            className="grid h-12 w-12 place-items-center rounded-[18px] bg-white shadow-[0_12px_28px_rgba(12,74,76,0.08)] ring-1 ring-teal-900/5 transition hover:-translate-y-0.5"
+            className="relative grid h-11 w-11 place-items-center rounded-[17px] bg-white text-[#087e8b]! shadow-[0_12px_28px_rgba(12,74,76,0.08)] ring-1 ring-teal-900/5 transition visited:text-[#087e8b]! hover:-translate-y-0.5"
             aria-label="Lihat transaksi"
           >
-            <Image src="/isiloka-concept/bell_notification.png" alt="" width={59} height={72} className="h-10 w-auto" />
+            <Bell className="h-5 w-5" strokeWidth={2.4} />
+            <span className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#ff315f]" />
           </Link>
           <Link
             href={isLoggedIn ? "/user/account" : "/login"}
             prefetch={false}
-            className="grid h-12 w-12 place-items-center overflow-hidden rounded-full bg-white shadow-[0_12px_28px_rgba(12,74,76,0.08)] ring-1 ring-teal-900/5 transition hover:-translate-y-0.5"
+            className={
+              isLoggedIn
+                ? "grid h-11 w-11 place-items-center overflow-hidden rounded-full bg-white text-sm font-black text-[#087e8b]! shadow-[0_12px_28px_rgba(12,74,76,0.08)] ring-1 ring-teal-900/5 transition visited:text-[#087e8b]! hover:-translate-y-0.5"
+                : "flex h-11 items-center gap-1.5 rounded-[17px] bg-white px-3 text-[13px] font-black text-[#087e8b]! shadow-[0_12px_28px_rgba(12,74,76,0.08)] ring-1 ring-teal-900/5 transition visited:text-[#087e8b]! hover:-translate-y-0.5"
+            }
             aria-label={isLoggedIn ? "Akun" : "Masuk"}
           >
-            <Image src="/isiloka-concept/avatar_profile.png" alt="" width={58} height={67} className="h-full w-full object-cover" />
+            {isLoggedIn ? (
+              <UserRound className="h-5 w-5" strokeWidth={2.4} />
+            ) : (
+              <>
+                <UserRound className="h-4 w-4" strokeWidth={2.4} />
+                <span>Masuk</span>
+              </>
+            )}
           </Link>
         </div>
       </div>
