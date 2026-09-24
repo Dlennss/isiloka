@@ -8,6 +8,7 @@ import {
   FileText,
   Gift,
   Grid2X2,
+  PhoneCall,
   Plus,
   ReceiptText,
   Send,
@@ -213,14 +214,34 @@ export function GuestConceptHome() {
                 <ChevronRight className="h-5 w-5" strokeWidth={3} />
               </Link>
             </div>
-            <Image
-              src="/isiloka-concept/hero_banner_phone_illustration.png"
-              alt=""
-              width={250}
-              height={222}
-              className="absolute bottom-[-10px] right-[-10px] z-10 h-auto w-[170px] max-w-none min-[390px]:w-[190px]"
-              sizes="(min-width: 390px) 190px, 170px"
-            />
+            <div className="absolute bottom-2 right-2 z-10 h-[150px] w-[158px] min-[390px]:right-3 min-[390px]:h-[164px] min-[390px]:w-[178px]">
+              <div className="absolute bottom-0 right-7 h-[132px] w-[78px] rotate-[7deg] rounded-[18px] border-[5px] border-[#07515a] bg-white shadow-[0_18px_32px_rgba(7,81,90,0.20)]">
+                <div className="mx-auto mt-2 h-1 w-7 rounded-full bg-[#07515a]/20" />
+                <div className="mt-7 grid place-items-center text-center">
+                  <Image
+                    src="/isiloka-concept/logo_symbol.png"
+                    alt=""
+                    width={34}
+                    height={34}
+                    className="h-8 w-8 rounded-lg"
+                  />
+                  <div className="mt-1 text-[13px] font-black leading-none text-[#07515a]">Isiloka</div>
+                  <div className="mt-0.5 text-[4px] font-black uppercase text-[#07515a]/70">Isi hari, dari sini</div>
+                </div>
+              </div>
+              <span className="absolute left-2 top-8 grid h-10 w-10 rotate-[-10deg] place-items-center rounded-xl bg-[#4fb7f4] text-white shadow-[0_10px_18px_rgba(34,138,203,0.20)]">
+                <PhoneCall className="h-5 w-5" strokeWidth={2.4} />
+              </span>
+              <span className="absolute right-0 top-3 grid h-11 w-11 rotate-[8deg] place-items-center rounded-xl bg-[#ffd45a] text-white shadow-[0_10px_18px_rgba(235,174,31,0.22)]">
+                <Zap className="h-6 w-6 fill-white" strokeWidth={2.1} />
+              </span>
+              <span className="absolute bottom-7 left-0 grid h-10 w-10 rotate-[-8deg] place-items-center rounded-xl bg-[#f05f89] text-white shadow-[0_10px_18px_rgba(217,70,120,0.20)]">
+                <Wifi className="h-5 w-5" strokeWidth={2.5} />
+              </span>
+              <span className="absolute bottom-2 right-1 grid h-10 w-10 rotate-[9deg] place-items-center rounded-xl bg-[#31c781] text-white shadow-[0_10px_18px_rgba(30,154,101,0.22)]">
+                <Wallet className="h-5 w-5" strokeWidth={2.3} />
+              </span>
+            </div>
           </div>
         </section>
 
