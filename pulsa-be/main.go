@@ -4,7 +4,9 @@ import (
 	"context"
 	"database/sql"
 	"log"
+	"net"
 	"net/http"
+	"os"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -262,7 +264,7 @@ func main() {
 	})
 
 	srv := &http.Server{
-		Addr:         ":" + cfg.Port,
+		Addr:         net.JoinHostPort(os.Getenv("HOST"), cfg.Port),
 		Handler:      handler,
 		ReadTimeout:  15 * time.Second,
 		WriteTimeout: 30 * time.Second,
