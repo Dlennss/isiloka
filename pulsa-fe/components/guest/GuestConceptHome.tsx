@@ -8,6 +8,7 @@ import {
   Send,
   ShieldCheck,
   Smartphone,
+  Sun,
   Wallet,
   Zap,
 } from "lucide-react";
@@ -107,7 +108,10 @@ export function GuestConceptHome() {
 
         <section className="mt-5">
           <h1 className="text-[28px] font-black leading-none text-[#061d38]">Halo, Dinda!</h1>
-          <p className="mt-2 text-[17px] font-semibold leading-tight text-[#62728b]">Semoga harimu menyenangkan ☀</p>
+          <p className="mt-2 flex items-center gap-2 text-[17px] font-semibold leading-tight text-[#62728b]">
+            Semoga harimu menyenangkan
+            <Sun className="h-5 w-5 fill-[#ffbf24] text-[#ffbf24]" strokeWidth={2.3} />
+          </p>
         </section>
 
         <section className="relative mt-5 overflow-hidden rounded-[24px] bg-[linear-gradient(135deg,#02786e_0%,#0aa889_52%,#7ee486_100%)] p-4 text-white shadow-[0_18px_40px_rgba(0,125,105,0.24)]">
@@ -137,17 +141,17 @@ export function GuestConceptHome() {
             </div>
 
             <div className="mt-7 grid grid-cols-3 gap-2">
-              <Link href="/login" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white/94 px-2 text-[13px] font-black text-[#075862] shadow-[0_10px_24px_rgba(6,77,70,0.12)]">
+              <Link href="/login" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0a7d76] text-white">
                   <Plus className="h-5 w-5" strokeWidth={3} />
                 </span>
                 <span>Isi Saldo</span>
               </Link>
-              <Link href="/user/transfer-bank" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white/94 px-2 text-[13px] font-black text-[#075862] shadow-[0_10px_24px_rgba(6,77,70,0.12)]">
+              <Link href="/user/transfer-bank" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <Send className="h-7 w-7 shrink-0 fill-[#0a7d76] text-[#0a7d76]" strokeWidth={1.8} />
                 <span>Transfer</span>
               </Link>
-              <Link href="/transaksi" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white/94 px-2 text-[13px] font-black text-[#075862] shadow-[0_10px_24px_rgba(6,77,70,0.12)]">
+              <Link href="/transaksi" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <ReceiptText className="h-7 w-7 shrink-0 fill-[#0a7d76] text-white" strokeWidth={2.2} />
                 <span>Riwayat</span>
               </Link>
@@ -158,9 +162,9 @@ export function GuestConceptHome() {
         <section className="relative mt-4 overflow-hidden rounded-[23px] bg-[#def8f2] px-5 pb-4 pt-5 shadow-[0_16px_36px_rgba(22,102,95,0.10)]">
           <div className="absolute -bottom-12 left-32 h-32 w-52 rounded-full bg-[#b7efd9]" />
           <div className="absolute -right-5 bottom-0 h-32 w-32 rounded-full bg-white/40" />
-          <div className="relative z-10 grid min-h-[205px] grid-cols-[1.05fr_0.95fr] gap-1">
+          <div className="relative z-10 grid min-h-[205px] grid-cols-[1.1fr_0.9fr] gap-2 min-[390px]:grid-cols-[1.05fr_0.95fr]">
             <div className="flex flex-col items-start">
-              <h2 className="text-[25px] font-black leading-[1.15] text-[#084f55]">Semua Kebutuhan Dalam Satu Aplikasi</h2>
+              <h2 className="text-[20px] font-black leading-[1.18] text-[#084f55] min-[390px]:text-[25px]">Semua Kebutuhan Dalam Satu Aplikasi</h2>
               <p className="mt-2 text-[14px] font-semibold leading-snug text-[#5a6f81]">
                 Isi pulsa, paket data, token listrik dan berbagai pembayaran lainnya.
               </p>
@@ -179,10 +183,10 @@ export function GuestConceptHome() {
                 alt=""
                 width={250}
                 height={222}
-                className="absolute bottom-0 right-[-4px] h-auto w-[165px] max-w-none min-[390px]:w-[205px]"
-                sizes="(min-width: 390px) 205px, 165px"
+                className="absolute bottom-[-2px] right-[-8px] h-auto w-[158px] max-w-none min-[390px]:right-[-4px] min-[390px]:w-[200px]"
+                sizes="(min-width: 390px) 200px, 158px"
               />
-              <div className="absolute right-0 top-3 max-w-[68px] rotate-[-5deg] text-center text-[15px] font-black italic leading-[1.02] text-[#07515a] min-[390px]:max-w-[78px] min-[390px]:text-[18px]">
+              <div className="absolute right-0 top-3 hidden max-w-[78px] rotate-[-5deg] text-center text-[18px] font-black italic leading-[1.02] text-[#07515a] min-[390px]:block">
                 Lebih Mudah Lebih Dekat Untukmu
               </div>
             </div>
