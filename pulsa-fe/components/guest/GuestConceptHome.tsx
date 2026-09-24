@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import type { UserAppOrder } from "@/components/user/types";
 import {
+  Bell,
   ChevronRight,
   CreditCard,
   Eye,
@@ -16,6 +17,7 @@ import {
   ShieldCheck,
   Smartphone,
   Sun,
+  UserRound,
   Wallet,
   Wifi,
   Zap,
@@ -170,20 +172,25 @@ export function GuestConceptHome({
             </div>
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex shrink-0 items-center gap-2">
             <Link
-              href="/transaksi"
+              href={user.isLoggedIn ? "/transaksi" : "/login"}
               prefetch={false}
               aria-label="Notifikasi"
-              className="relative grid h-12 w-12 place-items-center rounded-[18px] bg-white shadow-[0_14px_32px_rgba(12,68,75,0.11)]"
+              className="relative grid h-11 w-11 place-items-center rounded-[17px] bg-white text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.11)] visited:text-[#087e8b]!"
             >
-              <Image src="/isiloka-concept/bell_notification.png" alt="" width={31} height={31} className="h-8 w-8" />
+              <Bell className="h-5 w-5" strokeWidth={2.4} />
+              <span className="absolute right-2.5 top-2.5 h-2.5 w-2.5 rounded-full border-2 border-white bg-[#ff315f]" />
             </Link>
             <Link
               href={user.isLoggedIn ? "/user/account" : "/login"}
               prefetch={false}
               aria-label={user.isLoggedIn ? "Akun" : "Masuk"}
-              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-black text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.09)] visited:text-[#087e8b]!"
+              className={
+                user.isLoggedIn
+                  ? "grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-black text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.09)] visited:text-[#087e8b]!"
+                  : "flex h-11 shrink-0 items-center gap-1.5 rounded-[17px] bg-white px-3 text-[13px] font-black text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.09)] visited:text-[#087e8b]!"
+              }
             >
               {user.isLoggedIn && user.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -191,7 +198,10 @@ export function GuestConceptHome({
               ) : user.isLoggedIn ? (
                 <span>{initials(user.name, user.email)}</span>
               ) : (
-                <span>Masuk</span>
+                <>
+                  <UserRound className="h-4 w-4" strokeWidth={2.4} />
+                  <span>Masuk</span>
+                </>
               )}
             </Link>
           </div>
