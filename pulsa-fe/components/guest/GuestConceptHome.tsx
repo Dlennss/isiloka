@@ -6,6 +6,7 @@ import {
   CreditCard,
   Eye,
   FileText,
+  Gift,
   Grid2X2,
   Plus,
   ReceiptText,
@@ -265,14 +266,12 @@ export function GuestConceptHome() {
           </div>
         </section>
 
-        <section className="mt-5 flex items-center gap-3 rounded-[22px] bg-[#dff8ef] px-4 py-4 shadow-[0_16px_34px_rgba(15,78,81,0.09)]">
-          <Image
-            src="/isiloka-concept/promo_gift_illustration.png"
-            alt=""
-            width={95}
-            height={82}
-            className="h-[78px] w-[90px] shrink-0 object-contain"
-          />
+        <section className="mt-5 grid grid-cols-[72px_1fr] items-center gap-3 rounded-[22px] bg-[#dff8ef] px-4 py-4 shadow-[0_16px_34px_rgba(15,78,81,0.09)] min-[410px]:grid-cols-[78px_1fr_auto]">
+          <div className="relative grid h-[72px] w-[72px] shrink-0 place-items-center rounded-[20px] bg-[linear-gradient(135deg,#0f9d83,#36d091)] text-white shadow-[0_14px_26px_rgba(7,128,107,0.18)]">
+            <Gift className="h-10 w-10" strokeWidth={2.2} />
+            <span className="absolute -right-1 top-2 h-3 w-3 rounded-full bg-[#ffd34e]" />
+            <span className="absolute bottom-2 left-2 h-2 w-2 rounded-full bg-[#fff6bd]" />
+          </div>
           <div className="min-w-0 flex-1">
             <p className="text-[11px] font-black uppercase tracking-[0.08em] text-[#168b75]">Spesial Untuk Kamu</p>
             <h2 className="mt-1 text-[18px] font-black leading-tight text-[#084f55]">Banyak Promo Setiap Hari</h2>
@@ -281,7 +280,7 @@ export function GuestConceptHome() {
           <Link
             href="/artikel"
             prefetch={false}
-            className="hidden h-11 shrink-0 items-center gap-1 rounded-full bg-[#079c7f] px-4 text-[13px] font-black text-white shadow-[0_12px_24px_rgba(0,141,111,0.18)] min-[390px]:flex"
+            className="col-span-2 flex h-11 shrink-0 items-center justify-center gap-1 rounded-full bg-[#079c7f] px-4 text-[13px] font-black text-white! shadow-[0_12px_24px_rgba(0,141,111,0.18)] visited:text-white! min-[410px]:col-span-1"
           >
             Lihat Promo
             <ChevronRight className="h-4 w-4" strokeWidth={3} />
