@@ -22,8 +22,8 @@ body * { letter-spacing: 0 !important; }
 .auth-card button[type="submit"] { background: #087e8b !important; box-shadow: none !important; border-radius: 8px !important; }
 .auth-card input:not([type="checkbox"]), .auth-card button[type="button"]:not([aria-label]) { border-radius: 8px; }
 .auth-card a { color: #087e8b !important; }
-.brand-bottom-nav { border-radius: 0; border-top: 1px solid #d7e9e8; box-shadow: 0 -3px 14px #18232d06; }
-.brand-bottom-nav a { border-radius: 8px; }
+.brand-bottom-nav { border-top-color: #d7e9e8; }
+.brand-bottom-nav a { text-decoration: none; }
 .brand-bottom-nav a[class*="#087e8b"] { background: #f0f8f8; }
 .isiloka-home a,
 .isiloka-home a:hover,
