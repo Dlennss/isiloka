@@ -29,7 +29,7 @@ const hotspots: Hotspot[] = [
 
 export function GuestConceptHome() {
   return (
-    <div className="mx-auto w-full max-w-[941px]">
+    <div className="mx-auto w-full max-w-[430px]">
       <div className="relative">
         <Image
           src="/isiloka-concept/dashboard_full.png"
