@@ -24,8 +24,8 @@ jobs:
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
       SERVER_USER: ${{ secrets.SERVER_USER }}
       SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-      BACKEND_SOURCE_DIR: ${{ secrets.BACKEND_SOURCE_DIR }}
-      FRONTEND_SOURCE_DIR: ${{ secrets.FRONTEND_SOURCE_DIR }}
+      BACKEND_SOURCE_DIR: pulsa-be
+      FRONTEND_SOURCE_DIR: pulsa-fe
       FRONTEND_RELEASE_DIR: ${{ secrets.FRONTEND_RELEASE_DIR }}
 
     steps:
@@ -41,8 +41,6 @@ jobs:
             SERVER_PORT
             SERVER_USER
             SERVER_PASSWORD
-            BACKEND_SOURCE_DIR
-            FRONTEND_SOURCE_DIR
             FRONTEND_RELEASE_DIR
           )
           for name in "${required[@]}"; do
