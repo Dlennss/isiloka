@@ -1,7 +1,8 @@
 import Script from "next/script";
 import type { Metadata } from "next";
 import { getCategories } from "@/lib/api.products";
-import type { UserCategoryItem } from "@/components/user/types";
+import { getAppServerSession } from "@/lib/server-auth";
+import type { UserAppOrder, UserCategoryItem, UserProfile } from "@/components/user/types";
 import { GuestConceptHome } from "@/components/guest/GuestConceptHome";
 import { GuestBottomNav } from "@/components/guest/GuestBottomNav";
 import { CANONICAL_SITE_URL } from "@/lib/seo-articles";
@@ -48,8 +49,58 @@ export const metadata: Metadata = {
   },
 };
 
+type ProfileResponse = {
+  ok?: boolean;
+  profile?: UserProfile;
+};
+
+type OrdersResponse = {
+  ok?: boolean;
+  items?: UserAppOrder[];
+};
+
+const apiBase = () => (process.env.NEXT_PUBLIC_API_BASE || process.env.API_BASE || "http://127.0.0.1:8083").replace(/\/+$/, "");
+
+async function getHomeProfile(token?: string): Promise<UserProfile | null> {
+  if (!token) return null;
+  try {
+    const res = await fetch(`${apiBase()}/v1/me/profile`, {
+      cache: "no-store",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return null;
+    const json = (await res.json().catch(() => ({}))) as ProfileResponse;
+    return json.ok && json.profile ? json.profile : null;
+  } catch (error) {
+    console.error("[home] gagal mengambil profile", error);
+    return null;
+  }
+}
+
+async function getHomeOrders(token?: string): Promise<UserAppOrder[]> {
+  if (!token) return [];
+  try {
+    const res = await fetch(`${apiBase()}/v1/app/me/orders?limit=3`, {
+      cache: "no-store",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) return [];
+    const json = (await res.json().catch(() => ({}))) as OrdersResponse;
+    return Array.isArray(json.items) ? json.items : [];
+  } catch (error) {
+    console.error("[home] gagal mengambil aktivitas", error);
+    return [];
+  }
+}
+
 export default async function GuestHomePage() {
-  const categories = (await getCategories()) as UserCategoryItem[];
+  const session = await getAppServerSession();
+  const token = session?.backendToken;
+  const [categories, profile, recentOrders] = await Promise.all([
+    getCategories() as Promise<UserCategoryItem[]>,
+    getHomeProfile(token),
+    getHomeOrders(token),
+  ]);
   const activeCategories = categories.filter((item) => item.aktif);
 
   const websiteJsonLd = {
@@ -137,8 +188,17 @@ export default async function GuestHomePage() {
       <Script id="homepage-faq-jsonld" type="application/ld+json">
         {JSON.stringify(faqJsonLd)}
       </Script>
-      <GuestConceptHome />
-      <GuestBottomNav />
+      <GuestConceptHome
+        user={profile ? {
+          isLoggedIn: true,
+          name: profile.nama || profile.email,
+          email: profile.email,
+          image: profile.profile_photo_url || session?.user?.image || null,
+          balance: profile.saldo,
+        } : { isLoggedIn: false }}
+        recentOrders={recentOrders}
+      />
+      <GuestBottomNav isLoggedIn={Boolean(profile)} />
     </main>
   );
 }

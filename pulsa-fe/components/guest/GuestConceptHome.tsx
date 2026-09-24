@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
+import type { UserAppOrder } from "@/components/user/types";
 import {
   ChevronRight,
   CreditCard,
@@ -29,32 +30,75 @@ const services = [
   { href: "/kategori", label: "Lainnya", icon: Grid2X2, tone: "bg-[#dffff2] text-[#15b884]" },
 ];
 
-const activities = [
-  {
-    title: "Isi Pulsa Telkomsel",
-    detail: "+62 812 3456 7890",
-    amount: "- Rp 50.000",
-    time: "Hari ini, 08:24",
-    icon: Smartphone,
-    tone: "bg-[#dcfff4] text-[#12b98a]",
-  },
-  {
-    title: "Token Listrik PLN",
-    detail: "No. Meter 1234 5678 90",
-    amount: "- Rp 100.000",
-    time: "Kemarin, 19:12",
-    icon: Zap,
-    tone: "bg-[#fff1cc] text-[#ffac18]",
-  },
-  {
-    title: "Top Up DANA",
-    detail: "+62 812 3456 7890",
-    amount: "- Rp 75.000",
-    time: "12 Mar 2024, 14:03",
-    icon: Wallet,
-    tone: "bg-[#eee3ff] text-[#7654e8]",
-  },
-];
+type HomeUser =
+  | {
+      isLoggedIn: true;
+      name: string;
+      email: string;
+      image?: string | null;
+      balance: number;
+    }
+  | {
+      isLoggedIn: false;
+    };
+
+type ActivityItem = {
+  title: string;
+  detail: string;
+  amount: string;
+  time: string;
+  icon: LucideIcon;
+  tone: string;
+};
+
+function formatIDR(value: number) {
+  return `Rp ${new Intl.NumberFormat("id-ID").format(Number.isFinite(value) ? value : 0)}`;
+}
+
+function shortName(value?: string) {
+  const clean = String(value || "").trim();
+  if (!clean) return "Pengguna";
+  return clean.split(/\s+/)[0] || clean;
+}
+
+function initials(name?: string, email?: string) {
+  const source = String(name || email || "U").trim();
+  const parts = source.includes("@") ? [source[0]] : source.split(/\s+/);
+  return parts.slice(0, 2).map((part) => part[0]?.toUpperCase()).join("") || "U";
+}
+
+function formatOrderTime(value?: string | null) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
+function statusLabel(status?: string) {
+  const value = String(status || "").toLowerCase();
+  if (value === "success" || value === "paid" || value === "completed") return "Berhasil";
+  if (value === "failed" || value === "cancelled" || value === "expired") return "Gagal";
+  if (value === "pending") return "Diproses";
+  return status || "Transaksi";
+}
+
+function mapOrderToActivity(order: UserAppOrder): ActivityItem {
+  const name = order.produk_nama_snapshot || order.produk_sku_snapshot || "Transaksi";
+  const status = statusLabel(order.status);
+  return {
+    title: name,
+    detail: `${status}${order.dest ? ` • ${order.dest}` : ""}`,
+    amount: `- ${formatIDR(Number(order.harga_final || order.nominal || 0))}`,
+    time: formatOrderTime(order.dibuat_pada),
+    icon: order.status === "success" ? Smartphone : ReceiptText,
+    tone: order.status === "success" ? "bg-[#dcfff4] text-[#12b98a]" : "bg-[#e2f4ff] text-[#269be8]",
+  };
+}
 
 function SectionTitle({ title, href }: { title: string; href: string }) {
   return (
@@ -97,7 +141,16 @@ function ServiceCard({
   );
 }
 
-export function GuestConceptHome() {
+export function GuestConceptHome({
+  user = { isLoggedIn: false },
+  recentOrders = [],
+}: {
+  user?: HomeUser;
+  recentOrders?: UserAppOrder[];
+}) {
+  const displayName = user.isLoggedIn ? shortName(user.name || user.email) : "";
+  const activities = recentOrders.slice(0, 3).map(mapOrderToActivity);
+
   return (
     <main className="isiloka-home mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden bg-[radial-gradient(circle_at_50%_0%,#fafffe_0%,#f1fffb_44%,#e7f8f4_100%)] px-4 pb-28 pt-4 text-[#071d38] shadow-[0_20px_70px_rgba(8,91,84,0.14)] md:rounded-[34px]">
       <div className="mx-auto w-full max-w-[398px]">
@@ -127,26 +180,29 @@ export function GuestConceptHome() {
               <Image src="/isiloka-concept/bell_notification.png" alt="" width={31} height={31} className="h-8 w-8" />
             </Link>
             <Link
-              href="/login"
+              href={user.isLoggedIn ? "/user/account" : "/login"}
               prefetch={false}
-              aria-label="Akun"
-              className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white shadow-[0_14px_32px_rgba(12,68,75,0.09)]"
+              aria-label={user.isLoggedIn ? "Akun" : "Masuk"}
+              className="grid h-12 w-12 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-black text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.09)] visited:text-[#087e8b]!"
             >
-              <Image
-                src="/isiloka-concept/avatar_profile.png"
-                alt=""
-                width={58}
-                height={75}
-                className="h-11 w-9 rounded-full object-contain"
-              />
+              {user.isLoggedIn && user.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={user.image} alt="" className="h-full w-full object-cover" />
+              ) : user.isLoggedIn ? (
+                <span>{initials(user.name, user.email)}</span>
+              ) : (
+                <span>Masuk</span>
+              )}
             </Link>
           </div>
         </header>
 
         <section className="mt-6">
-          <h1 className="text-[28px] font-black leading-none text-[#061d38]">Halo, Dinda!</h1>
+          <h1 className="text-[28px] font-black leading-none text-[#061d38]">
+            {user.isLoggedIn ? `Halo, ${displayName}!` : "Halo!"}
+          </h1>
           <p className="mt-2 flex items-center gap-2 text-[17px] font-semibold leading-tight text-[#62728b]">
-            Semoga harimu menyenangkan
+            {user.isLoggedIn ? "Semoga harimu menyenangkan" : "Masuk untuk melihat saldo dan aktivitas akun"}
             <Sun className="h-5 w-5 fill-[#ffbf24] text-[#ffbf24]" strokeWidth={2.3} />
           </p>
         </section>
@@ -167,7 +223,9 @@ export function GuestConceptHome() {
             </div>
 
             <div className="mt-4 flex items-center gap-3">
-              <div className="text-[38px] font-black leading-none tracking-normal">Rp 250.000</div>
+              <div className="text-[38px] font-black leading-none tracking-normal">
+                {user.isLoggedIn ? formatIDR(user.balance) : "Masuk dulu"}
+              </div>
               <button
                 type="button"
                 aria-label="Lihat saldo"
@@ -178,17 +236,17 @@ export function GuestConceptHome() {
             </div>
 
             <div className="mt-7 grid grid-cols-3 gap-2">
-              <Link href="/login" prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
+              <Link href={user.isLoggedIn ? "/user/account/topup" : "/login"} prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0a7d76] text-white">
                   <Plus className="h-5 w-5" strokeWidth={3} />
                 </span>
                 <span>Isi Saldo</span>
               </Link>
-              <Link href="/user/transfer-bank" prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
+              <Link href={user.isLoggedIn ? "/user/transfer-bank" : "/login"} prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <Send className="h-7 w-7 shrink-0 fill-[#0a7d76] text-[#0a7d76]" strokeWidth={1.8} />
                 <span>Transfer</span>
               </Link>
-              <Link href="/transaksi" prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
+              <Link href={user.isLoggedIn ? "/transaksi" : "/login"} prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <ReceiptText className="h-7 w-7 shrink-0 fill-[#0a7d76] text-white" strokeWidth={2.2} />
                 <span>Riwayat</span>
               </Link>
@@ -262,26 +320,34 @@ export function GuestConceptHome() {
 
         <section className="mt-5 rounded-[22px] bg-white px-4 py-4 shadow-[0_16px_36px_rgba(15,78,81,0.10)]">
           <SectionTitle title="Aktivitas Terakhir" href="/transaksi" />
-          <div className="divide-y divide-[#e5eef0]">
-            {activities.map((activity) => {
-              const Icon = activity.icon;
-              return (
-                <Link key={activity.title} href="/transaksi" prefetch={false} className="grid grid-cols-[44px_1fr_auto] items-center gap-3 py-3 first:pt-1 last:pb-0">
-                  <span className={`grid h-11 w-11 place-items-center rounded-full ${activity.tone}`}>
-                    <Icon className="h-6 w-6" strokeWidth={2.3} />
-                  </span>
-                  <span className="min-w-0">
-                    <span className="block truncate text-[15px] font-black leading-tight text-[#0a1e38]">{activity.title}</span>
-                    <span className="mt-1 block truncate text-[13px] font-semibold text-[#657790]">{activity.detail}</span>
-                  </span>
-                  <span className="text-right">
-                    <span className="block text-[15px] font-black leading-tight text-[#0a1e38]">{activity.amount}</span>
-                    <span className="mt-1 block text-[12px] font-semibold text-[#657790]">{activity.time}</span>
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+          {user.isLoggedIn && activities.length > 0 ? (
+            <div className="divide-y divide-[#e5eef0]">
+              {activities.map((activity) => {
+                const Icon = activity.icon;
+                return (
+                  <Link key={`${activity.title}-${activity.time}`} href="/transaksi" prefetch={false} className="grid grid-cols-[44px_1fr_auto] items-center gap-3 py-3 first:pt-1 last:pb-0">
+                    <span className={`grid h-11 w-11 place-items-center rounded-full ${activity.tone}`}>
+                      <Icon className="h-6 w-6" strokeWidth={2.3} />
+                    </span>
+                    <span className="min-w-0">
+                      <span className="block truncate text-[15px] font-black leading-tight text-[#0a1e38]">{activity.title}</span>
+                      <span className="mt-1 block truncate text-[13px] font-semibold text-[#657790]">{activity.detail}</span>
+                    </span>
+                    <span className="text-right">
+                      <span className="block text-[15px] font-black leading-tight text-[#0a1e38]">{activity.amount}</span>
+                      <span className="mt-1 block text-[12px] font-semibold text-[#657790]">{activity.time}</span>
+                    </span>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="grid min-h-[96px] place-items-center rounded-[18px] bg-[#f2fbf8] px-4 text-center">
+              <p className="text-sm font-bold leading-relaxed text-[#52756b]">
+                {user.isLoggedIn ? "Belum ada aktivitas transaksi." : "Masuk untuk melihat aktivitas transaksi akun."}
+              </p>
+            </div>
+          )}
         </section>
 
         <section className="mt-5 grid grid-cols-[72px_1fr] items-center gap-3 rounded-[22px] bg-[#dff8ef] px-4 py-4 shadow-[0_16px_34px_rgba(15,78,81,0.09)] min-[410px]:grid-cols-[78px_1fr_auto]">
