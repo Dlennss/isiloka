@@ -25,6 +25,15 @@ body * { letter-spacing: 0 !important; }
 .brand-bottom-nav { border-radius: 0; border-top: 1px solid #d7e9e8; box-shadow: 0 -3px 14px #18232d06; }
 .brand-bottom-nav a { border-radius: 8px; }
 .brand-bottom-nav a[class*="#087e8b"] { background: #f0f8f8; }
+.isiloka-home a,
+.isiloka-home a:hover,
+.isiloka-home a:visited {
+  color: inherit;
+  text-decoration: none;
+}
+.isiloka-home img {
+  display: block;
+}
 .brand-retail-main section > div[class*="rounded-"][class*="bg-linear-"]:not(.brand-categories) { background-image: none; background-color: white; }
 .brand-retail-main .blur-2xl, .brand-retail-main .blur-3xl { display: none; }
 .brand-retail-main h2 { font-size: 16px; line-height: 1.4; }

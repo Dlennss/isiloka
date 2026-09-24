@@ -1,8 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import {
   ChevronRight,
+  CreditCard,
   Eye,
+  FileText,
+  Grid2X2,
   Plus,
   ReceiptText,
   Send,
@@ -10,16 +14,17 @@ import {
   Smartphone,
   Sun,
   Wallet,
+  Wifi,
   Zap,
 } from "lucide-react";
 
 const services = [
-  { href: "/pulsa-data", label: "Pulsa & Data", icon: "/isiloka-concept/pulsa_data_icon.png" },
-  { href: "/listrik/token", label: "Token Listrik", icon: "/isiloka-concept/token_listrik_icon.png" },
-  { href: "/ewallet", label: "E-Wallet", icon: "/isiloka-concept/ewallet_icon.png" },
-  { href: "/kategori", label: "Tagihan", icon: "/isiloka-concept/tagihan_icon.png" },
-  { href: "/internet-pascabayar", label: "Paket Internet", icon: "/isiloka-concept/paket_internet_icon.png" },
-  { href: "/kategori", label: "Lainnya", icon: "/isiloka-concept/lainnya_icon.png" },
+  { href: "/pulsa-data", label: "Pulsa & Data", icon: Smartphone, tone: "bg-[#dcfff4] text-[#12b98a]" },
+  { href: "/listrik/token", label: "Token Listrik", icon: Zap, tone: "bg-[#fff1cc] text-[#ffac18]" },
+  { href: "/ewallet", label: "E-Wallet", icon: CreditCard, tone: "bg-[#eee3ff] text-[#7654e8]" },
+  { href: "/kategori", label: "Tagihan", icon: FileText, tone: "bg-[#e2f4ff] text-[#269be8]" },
+  { href: "/internet-pascabayar", label: "Paket Internet", icon: Wifi, tone: "bg-[#ffe3ed] text-[#ee4770]" },
+  { href: "/kategori", label: "Lainnya", icon: Grid2X2, tone: "bg-[#dffff2] text-[#15b884]" },
 ];
 
 const activities = [
@@ -65,11 +70,36 @@ function SectionTitle({ title, href }: { title: string; href: string }) {
   );
 }
 
+function ServiceCard({
+  href,
+  label,
+  icon: Icon,
+  tone,
+}: {
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  tone: string;
+}) {
+  return (
+    <Link
+      href={href}
+      prefetch={false}
+      className="flex min-h-[112px] flex-col items-center justify-center rounded-[18px] bg-white px-2 text-center text-[#0a1e38]! shadow-[0_13px_28px_rgba(15,78,81,0.09)] visited:text-[#0a1e38]!"
+    >
+      <span className={`grid h-12 w-12 place-items-center rounded-[16px] ${tone}`}>
+        <Icon className="h-7 w-7" strokeWidth={2.25} />
+      </span>
+      <span className="mt-2 block min-h-[32px] text-[13px] font-black leading-tight">{label}</span>
+    </Link>
+  );
+}
+
 export function GuestConceptHome() {
   return (
-    <main className="mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden bg-[radial-gradient(circle_at_50%_0%,#fafffe_0%,#f1fffb_44%,#e7f8f4_100%)] px-4 pb-28 pt-4 text-[#071d38] shadow-[0_20px_70px_rgba(8,91,84,0.14)] md:rounded-[34px]">
+    <main className="isiloka-home mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden bg-[radial-gradient(circle_at_50%_0%,#fafffe_0%,#f1fffb_44%,#e7f8f4_100%)] px-4 pb-28 pt-4 text-[#071d38] shadow-[0_20px_70px_rgba(8,91,84,0.14)] md:rounded-[34px]">
       <div className="mx-auto w-full max-w-[398px]">
-        <header className="flex items-start justify-between pt-1">
+        <header className="flex items-start justify-between gap-3 pt-1">
           <div className="flex items-center gap-3">
             <Image
               src="/isiloka-concept/logo_symbol.png"
@@ -79,9 +109,9 @@ export function GuestConceptHome() {
               className="h-12 w-12 rounded-xl"
               priority
             />
-            <div className="leading-none">
-              <div className="text-[26px] font-black tracking-normal text-[#084f55]">Isiloka</div>
-              <div className="mt-1 text-[11px] font-extrabold tracking-[0.03em] text-[#536a7d]">ISI HARI, DARI SINI</div>
+            <div className="min-w-0 leading-none">
+              <div className="text-[25px] font-black tracking-normal text-[#084f55]">Isiloka</div>
+              <div className="mt-1 whitespace-nowrap text-[10px] font-extrabold tracking-[0.03em] text-[#536a7d]">ISI HARI, DARI SINI</div>
             </div>
           </div>
 
@@ -106,7 +136,7 @@ export function GuestConceptHome() {
           </div>
         </header>
 
-        <section className="mt-5">
+        <section className="mt-6">
           <h1 className="text-[28px] font-black leading-none text-[#061d38]">Halo, Dinda!</h1>
           <p className="mt-2 flex items-center gap-2 text-[17px] font-semibold leading-tight text-[#62728b]">
             Semoga harimu menyenangkan
@@ -141,17 +171,17 @@ export function GuestConceptHome() {
             </div>
 
             <div className="mt-7 grid grid-cols-3 gap-2">
-              <Link href="/login" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
+              <Link href="/login" prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-[#0a7d76] text-white">
                   <Plus className="h-5 w-5" strokeWidth={3} />
                 </span>
                 <span>Isi Saldo</span>
               </Link>
-              <Link href="/user/transfer-bank" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
+              <Link href="/user/transfer-bank" prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <Send className="h-7 w-7 shrink-0 fill-[#0a7d76] text-[#0a7d76]" strokeWidth={1.8} />
                 <span>Transfer</span>
               </Link>
-              <Link href="/transaksi" prefetch={false} className="flex h-[62px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
+              <Link href="/transaksi" prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <ReceiptText className="h-7 w-7 shrink-0 fill-[#0a7d76] text-white" strokeWidth={2.2} />
                 <span>Riwayat</span>
               </Link>
@@ -159,36 +189,34 @@ export function GuestConceptHome() {
           </div>
         </section>
 
-        <section className="relative mt-4 overflow-hidden rounded-[23px] bg-[#def8f2] px-5 pb-4 pt-5 shadow-[0_16px_36px_rgba(22,102,95,0.10)]">
-          <div className="absolute -bottom-12 left-32 h-32 w-52 rounded-full bg-[#b7efd9]" />
-          <div className="absolute -right-5 bottom-0 h-32 w-32 rounded-full bg-white/40" />
-          <div className="relative z-10 grid min-h-[205px] grid-cols-[1.1fr_0.9fr] gap-2 min-[390px]:grid-cols-[1.05fr_0.95fr]">
-            <div className="flex flex-col items-start">
-              <h2 className="text-[20px] font-black leading-[1.18] text-[#084f55] min-[390px]:text-[25px]">Semua Kebutuhan Dalam Satu Aplikasi</h2>
-              <p className="mt-2 text-[14px] font-semibold leading-snug text-[#5a6f81]">
+        <section className="relative mt-4 overflow-hidden rounded-[23px] bg-[#def8f2] p-5 shadow-[0_16px_36px_rgba(22,102,95,0.10)]">
+          <div className="absolute -bottom-10 left-28 h-36 w-56 rounded-full bg-[#b7efd9]" />
+          <div className="absolute -right-8 top-4 h-32 w-32 rounded-full bg-white/45" />
+          <div className="relative z-10 min-h-[186px]">
+            <div className="relative z-20 max-w-[188px] min-[390px]:max-w-[205px]">
+              <h2 className="text-[21px] font-black leading-[1.16] text-[#084f55] min-[390px]:text-[24px]">Semua Kebutuhan Dalam Satu Aplikasi</h2>
+              <p className="mt-2 text-[13px] font-semibold leading-snug text-[#5a6f81] min-[390px]:text-[14px]">
                 Isi pulsa, paket data, token listrik dan berbagai pembayaran lainnya.
               </p>
               <Link
                 href="/pulsa-data"
                 prefetch={false}
-                className="mt-4 flex h-11 items-center gap-2 rounded-full bg-[#079c7f] px-5 text-[15px] font-extrabold text-white shadow-[0_12px_24px_rgba(0,141,111,0.22)]"
+                className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-[#079c7f] px-5 text-[15px] font-extrabold text-white! shadow-[0_12px_24px_rgba(0,141,111,0.22)] visited:text-white!"
               >
                 Isi Sekarang
                 <ChevronRight className="h-5 w-5" strokeWidth={3} />
               </Link>
             </div>
-            <div className="relative min-h-[190px]">
-              <Image
-                src="/isiloka-concept/hero_banner_phone_illustration.png"
-                alt=""
-                width={250}
-                height={222}
-                className="absolute bottom-[-2px] right-[-8px] h-auto w-[158px] max-w-none min-[390px]:right-[-4px] min-[390px]:w-[200px]"
-                sizes="(min-width: 390px) 200px, 158px"
-              />
-              <div className="absolute right-0 top-3 hidden max-w-[78px] rotate-[-5deg] text-center text-[18px] font-black italic leading-[1.02] text-[#07515a] min-[390px]:block">
+            <Image
+              src="/isiloka-concept/hero_banner_phone_illustration.png"
+              alt=""
+              width={250}
+              height={222}
+              className="absolute bottom-[-10px] right-[-10px] z-10 h-auto w-[170px] max-w-none min-[390px]:w-[190px]"
+              sizes="(min-width: 390px) 190px, 170px"
+            />
+            <div className="absolute right-2 top-2 z-20 hidden max-w-[72px] rotate-[-5deg] text-center text-[16px] font-black italic leading-[1.02] text-[#07515a] min-[410px]:block">
                 Lebih Mudah Lebih Dekat Untukmu
-              </div>
             </div>
           </div>
         </section>
@@ -203,15 +231,7 @@ export function GuestConceptHome() {
           <SectionTitle title="Layanan Favorit" href="/kategori" />
           <div className="grid grid-cols-3 gap-3">
             {services.map((service) => (
-              <Link
-                key={service.label}
-                href={service.href}
-                prefetch={false}
-                className="flex aspect-[1.42] min-h-[102px] flex-col items-center justify-center rounded-[18px] bg-white px-2 text-center shadow-[0_13px_28px_rgba(15,78,81,0.09)]"
-              >
-                <Image src={service.icon} alt="" width={54} height={54} className="h-[54px] w-[54px] object-contain" />
-                <span className="mt-2 text-[13px] font-black leading-tight text-[#0a1e38]">{service.label}</span>
-              </Link>
+              <ServiceCard key={service.label} {...service} />
             ))}
           </div>
         </section>
