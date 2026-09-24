@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 
 type AppTopHeaderProps = {
   isLoggedIn?: boolean;
@@ -9,11 +12,14 @@ type AppTopHeaderProps = {
 };
 
 export function AppTopHeader({ isLoggedIn = false, userName, saldo, role }: AppTopHeaderProps) {
+  const pathname = usePathname();
   const normalizedRole = String(role || "").trim().toLowerCase();
   const isRetailLoggedIn = isLoggedIn && (normalizedRole === "user" || normalizedRole === "agent" || normalizedRole === "master");
   const homeHref = isRetailLoggedIn ? "/user" : "/";
   void userName;
   void saldo;
+
+  if (pathname === "/") return null;
 
   return (
     <header className="brand-app-header sticky top-0 z-30 bg-[#f7fffc]/92 px-5 pb-2.5 pt-5 text-[#073b43] backdrop-blur-xl">

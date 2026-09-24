@@ -1,17 +1,9 @@
 import Script from "next/script";
-import { getServerSession } from "next-auth";
 import type { Metadata } from "next";
-import { authOptions } from "@/lib/nextauth";
 import { getCategories } from "@/lib/api.products";
-import type { UserCategoryItem, UserSession } from "@/components/user/types";
-import { GuestBottomNav } from "@/components/guest/GuestBottomNav";
+import type { UserCategoryItem } from "@/components/user/types";
 import { GuestConceptHome } from "@/components/guest/GuestConceptHome";
 import { CANONICAL_SITE_URL } from "@/lib/seo-articles";
-
-type SessionShape = {
-  user?: UserSession;
-  backendToken?: string;
-};
 
 const homeTitle = "Isiloka | Pulsa, Paket Data, E-Wallet, Token Listrik, Game & PPOB";
 const homeDescription =
@@ -56,7 +48,6 @@ export const metadata: Metadata = {
 };
 
 export default async function GuestHomePage() {
-  const session = (await getServerSession(authOptions)) as SessionShape | null;
   const categories = (await getCategories()) as UserCategoryItem[];
   const activeCategories = categories.filter((item) => item.aktif);
 
@@ -145,8 +136,7 @@ export default async function GuestHomePage() {
       <Script id="homepage-faq-jsonld" type="application/ld+json">
         {JSON.stringify(faqJsonLd)}
       </Script>
-      <GuestConceptHome isLoggedIn={!!session?.backendToken} />
-      <GuestBottomNav isLoggedIn={!!session?.backendToken} />
+      <GuestConceptHome />
     </main>
   );
 }
