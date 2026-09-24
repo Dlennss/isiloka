@@ -110,10 +110,16 @@ jobs:
         run: |
           set -euo pipefail
           SSH_OPTS="-p ${SERVER_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          BACKEND_RELEASE_DIR="~/isiloka/${BACKEND_SOURCE_DIR}"
+          BACKEND_RELEASE_DIR="isiloka/${BACKEND_SOURCE_DIR}"
 
           sshpass -e ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" \
-            "mkdir -p '${FRONTEND_RELEASE_DIR}' ${BACKEND_RELEASE_DIR}"
+            "set -e;
+             mkdir -p '${BACKEND_RELEASE_DIR}';
+             if ! mkdir -p '${FRONTEND_RELEASE_DIR}' 2>/dev/null; then
+               group=\$(id -gn);
+               printf '%s\n' '${SERVER_PASSWORD}' | sudo -S mkdir -p '${FRONTEND_RELEASE_DIR}';
+               printf '%s\n' '${SERVER_PASSWORD}' | sudo -S chown -R '${SERVER_USER}':\"\$group\" '${FRONTEND_RELEASE_DIR}';
+             fi"
 
           sshpass -e rsync -az --delete -e "ssh ${SSH_OPTS}" \
             deploy/frontend/ "${SERVER_USER}@${SERVER_HOST}:${FRONTEND_RELEASE_DIR}/"
