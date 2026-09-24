@@ -221,9 +221,6 @@ export function GuestConceptHome() {
               className="absolute bottom-[-10px] right-[-10px] z-10 h-auto w-[170px] max-w-none min-[390px]:w-[190px]"
               sizes="(min-width: 390px) 190px, 170px"
             />
-            <div className="absolute right-2 top-2 z-20 hidden max-w-[72px] rotate-[-5deg] text-center text-[16px] font-black italic leading-[1.02] text-[#07515a] min-[410px]:block">
-                Lebih Mudah Lebih Dekat Untukmu
-            </div>
           </div>
         </section>
 
