@@ -1,0 +1,135 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Build and Deploy to Server
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+
+    env:
+      SERVER_HOST: ${{ secrets.SERVER_HOST }}
+      SERVER_PORT: ${{ secrets.SERVER_PORT }}
+      SERVER_USER: ${{ secrets.SERVER_USER }}
+      SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
+      BACKEND_SOURCE_DIR: ${{ secrets.BACKEND_SOURCE_DIR }}
+      FRONTEND_SOURCE_DIR: ${{ secrets.FRONTEND_SOURCE_DIR }}
+      FRONTEND_RELEASE_DIR: ${{ secrets.FRONTEND_RELEASE_DIR }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate deployment secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          required=(
+            SERVER_HOST
+            SERVER_PORT
+            SERVER_USER
+            SERVER_PASSWORD
+            BACKEND_SOURCE_DIR
+            FRONTEND_SOURCE_DIR
+            FRONTEND_RELEASE_DIR
+          )
+          for name in "${required[@]}"; do
+            if [ -z "${!name:-}" ]; then
+              echo "::error::$name is empty. Add it in GitHub repository secrets."
+              exit 1
+            fi
+          done
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.24.2"
+          cache-dependency-path: ${{ secrets.BACKEND_SOURCE_DIR }}/go.sum
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.11.1"
+          cache: npm
+          cache-dependency-path: ${{ secrets.FRONTEND_SOURCE_DIR }}/package-lock.json
+
+      - name: Build backend
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p deploy/backend
+          cd "$BACKEND_SOURCE_DIR"
+          go mod download
+          go test ./...
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../deploy/backend/isiloka-api .
+
+      - name: Build frontend standalone
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "$FRONTEND_SOURCE_DIR"
+          npm ci
+          npm run lint
+          npm run build
+          cd ..
+          rm -rf deploy/frontend
+          mkdir -p deploy/frontend/.next
+          cp -R "$FRONTEND_SOURCE_DIR/.next/standalone/." deploy/frontend/
+          cp -R "$FRONTEND_SOURCE_DIR/.next/static" deploy/frontend/.next/static
+          cp -R "$FRONTEND_SOURCE_DIR/public" deploy/frontend/public
+
+      - name: Install SSH tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y sshpass rsync
+
+      - name: Upload release files
+        shell: bash
+        env:
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
+        run: |
+          set -euo pipefail
+          SSH_OPTS="-p ${SERVER_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          BACKEND_RELEASE_DIR="~/isiloka/${BACKEND_SOURCE_DIR}"
+
+          sshpass -e ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" \
+            "mkdir -p '${FRONTEND_RELEASE_DIR}' ${BACKEND_RELEASE_DIR}"
+
+          sshpass -e rsync -az --delete -e "ssh ${SSH_OPTS}" \
+            deploy/frontend/ "${SERVER_USER}@${SERVER_HOST}:${FRONTEND_RELEASE_DIR}/"
+
+          sshpass -e rsync -az -e "ssh ${SSH_OPTS}" \
+            deploy/backend/isiloka-api "${SERVER_USER}@${SERVER_HOST}:${BACKEND_RELEASE_DIR}/isiloka-api"
+
+      - name: Restart services if configured
+        shell: bash
+        env:
+          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
+        run: |
+          set -euo pipefail
+          SSH_OPTS="-p ${SERVER_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+          sshpass -e ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" "
+            chmod +x ~/isiloka/${BACKEND_SOURCE_DIR}/isiloka-api
+            if command -v systemctl >/dev/null 2>&1 && systemctl list-unit-files | grep -q '^isiloka-backend.service'; then
+              sudo -n systemctl restart isiloka-backend || systemctl --user restart isiloka-backend || true
+            fi
+            if command -v pm2 >/dev/null 2>&1; then
+              cd '${FRONTEND_RELEASE_DIR}'
+              pm2 describe isiloka-frontend >/dev/null 2>&1 && pm2 restart isiloka-frontend || pm2 start server.js --name isiloka-frontend
+              pm2 save || true
+            fi
+          "

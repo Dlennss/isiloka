@@ -1,15 +1,11 @@
-import { Suspense } from "react";
 import Script from "next/script";
 import { getServerSession } from "next-auth";
 import type { Metadata } from "next";
 import { authOptions } from "@/lib/nextauth";
 import { getCategories } from "@/lib/api.products";
 import type { UserCategoryItem, UserSession } from "@/components/user/types";
-import { UserFavoriteTransactions, UserMonthlyBills, UserRecentActivity } from "@/components/user/UserMainSections";
 import { GuestBottomNav } from "@/components/guest/GuestBottomNav";
-import { GuestCategoryGrid } from "@/components/guest/GuestCategoryGrid";
-import { GuestAdsSection } from "@/components/guest/GuestAdsSection";
-import { GuestAdsCarouselSkeleton } from "@/components/guest/GuestAdsCarouselSkeleton";
+import { GuestConceptHome } from "@/components/guest/GuestConceptHome";
 import { CANONICAL_SITE_URL } from "@/lib/seo-articles";
 
 type SessionShape = {
@@ -149,16 +145,7 @@ export default async function GuestHomePage() {
       <Script id="homepage-faq-jsonld" type="application/ld+json">
         {JSON.stringify(faqJsonLd)}
       </Script>
-      <div className="space-y-3 px-3 pt-3">
-        <Suspense fallback={<GuestAdsCarouselSkeleton />}>
-          <GuestAdsSection />
-        </Suspense>
-        <GuestCategoryGrid items={categories} />
-        <UserRecentActivity href="/kategori" />
-        <UserFavoriteTransactions href="/kategori" />
-        <UserMonthlyBills href="/listrik/tagihan" />
-      </div>
-
+      <GuestConceptHome isLoggedIn={!!session?.backendToken} />
       <GuestBottomNav isLoggedIn={!!session?.backendToken} />
     </main>
   );
