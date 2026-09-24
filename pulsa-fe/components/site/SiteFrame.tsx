@@ -8,7 +8,7 @@ export function SiteFrame({ children }: { children: React.ReactNode }) {
 
   if (isHome) {
     return (
-      <div className="min-h-dvh bg-[#eaf8f5] text-neutral-900 md:grid md:place-items-start md:py-4 [&_.site-frame-shell]:max-w-[430px] [&_.site-frame-shell]:overflow-visible [&_.site-frame-shell]:bg-transparent [&_.site-frame-shell]:shadow-none md:[&_.site-frame-shell]:w-[430px] md:[&_.site-frame-shell]:rounded-[42px] md:[&_.site-frame-shell]:border-0">
+      <div className="min-h-dvh bg-[#eaf8f5] text-neutral-900 md:grid md:place-items-start md:py-4 [&_.site-frame-shell]:max-w-[430px] [&_.site-frame-shell]:overflow-visible [&_.site-frame-shell]:bg-transparent [&_.site-frame-shell]:shadow-none md:[&_.site-frame-shell]:w-[430px] md:[&_.site-frame-shell]:rounded-[32px] md:[&_.site-frame-shell]:border-0">
         {children}
       </div>
     );

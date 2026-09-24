@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 import { getCategories } from "@/lib/api.products";
 import type { UserCategoryItem } from "@/components/user/types";
 import { GuestConceptHome } from "@/components/guest/GuestConceptHome";
+import { GuestBottomNav } from "@/components/guest/GuestBottomNav";
 import { CANONICAL_SITE_URL } from "@/lib/seo-articles";
 
 const homeTitle = "Isiloka | Pulsa, Paket Data, E-Wallet, Token Listrik, Game & PPOB";
@@ -137,6 +138,7 @@ export default async function GuestHomePage() {
         {JSON.stringify(faqJsonLd)}
       </Script>
       <GuestConceptHome />
+      <GuestBottomNav />
     </main>
   );
 }
