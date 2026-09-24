@@ -26,7 +26,7 @@ jobs:
       SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
       BACKEND_SOURCE_DIR: pulsa-be
       FRONTEND_SOURCE_DIR: pulsa-fe
-      FRONTEND_RELEASE_DIR: ${{ secrets.FRONTEND_RELEASE_DIR }}
+      FRONTEND_RELEASE_DIR: isiloka/frontend
 
     steps:
       - name: Checkout
@@ -41,7 +41,6 @@ jobs:
             SERVER_PORT
             SERVER_USER
             SERVER_PASSWORD
-            FRONTEND_RELEASE_DIR
           )
           for name in "${required[@]}"; do
             if [ -z "${!name:-}" ]; then
@@ -115,14 +114,10 @@ jobs:
           sshpass -e ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" \
             "set -e;
              mkdir -p \"\$HOME/${BACKEND_RELEASE_DIR}\";
-             if ! mkdir -p '${FRONTEND_RELEASE_DIR}' 2>/dev/null; then
-               group=\$(id -gn);
-               printf '%s\n' '${SERVER_PASSWORD}' | sudo -S mkdir -p '${FRONTEND_RELEASE_DIR}';
-               printf '%s\n' '${SERVER_PASSWORD}' | sudo -S chown -R '${SERVER_USER}':\"\$group\" '${FRONTEND_RELEASE_DIR}';
-             fi"
+             mkdir -p \"\$HOME/${FRONTEND_RELEASE_DIR}\""
 
           sshpass -e rsync -az --delete -e "ssh ${SSH_OPTS}" \
-            deploy/frontend/ "${SERVER_USER}@${SERVER_HOST}:${FRONTEND_RELEASE_DIR}/"
+            deploy/frontend/ "${SERVER_USER}@${SERVER_HOST}:~/${FRONTEND_RELEASE_DIR}/"
 
           sshpass -e rsync -az -e "ssh ${SSH_OPTS}" \
             deploy/backend/isiloka-api "${SERVER_USER}@${SERVER_HOST}:~/${BACKEND_RELEASE_DIR}/isiloka-api"
@@ -140,7 +135,7 @@ jobs:
               sudo -n systemctl restart isiloka-backend || systemctl --user restart isiloka-backend || true
             fi
             if command -v pm2 >/dev/null 2>&1; then
-              cd '${FRONTEND_RELEASE_DIR}'
+              cd ~/isiloka/frontend
               pm2 describe isiloka-frontend >/dev/null 2>&1 && pm2 restart isiloka-frontend || pm2 start server.js --name isiloka-frontend
               pm2 save || true
             fi
