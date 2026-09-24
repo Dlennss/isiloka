@@ -124,13 +124,18 @@ export function GuestConceptHome() {
             >
               <Image src="/isiloka-concept/bell_notification.png" alt="" width={31} height={31} className="h-8 w-8" />
             </Link>
-            <Link href="/login" prefetch={false} aria-label="Akun">
+            <Link
+              href="/login"
+              prefetch={false}
+              aria-label="Akun"
+              className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white shadow-[0_14px_32px_rgba(12,68,75,0.09)]"
+            >
               <Image
                 src="/isiloka-concept/avatar_profile.png"
                 alt=""
-                width={48}
-                height={48}
-                className="h-12 w-12 rounded-full object-cover"
+                width={58}
+                height={75}
+                className="h-11 w-9 rounded-full object-contain"
               />
             </Link>
           </div>
