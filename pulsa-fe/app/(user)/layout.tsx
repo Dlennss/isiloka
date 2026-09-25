@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 import { getAppServerSession } from "@/lib/server-auth";
 import type { UserSession } from "@/components/user/types";
 import { AppTopHeader } from "@/components/shared/AppTopHeader";
+import { SiteFrame } from "@/components/site/SiteFrame";
+import { SiteShell } from "@/components/site/SiteShell";
 
 export const metadata: Metadata = {
   title: "User Area - Isiloka",
@@ -32,16 +34,14 @@ export default async function UserLayout({ children }: { children: React.ReactNo
   }
 
   return (
-    <div className="min-h-svh bg-sky-50 text-neutral-900 md:grid md:place-items-start md:py-4">
-      <div className="relative mx-auto w-full max-w-md md:w-97.5 md:max-w-none md:border md:border-slate-200 md:bg-sky-50 md:shadow-[0_24px_80px_rgba(15,23,42,0.18)]">
+    <SiteFrame>
+      <div className="site-frame-shell relative mx-auto min-h-dvh w-full max-w-md overflow-hidden bg-[#f7fffc] shadow-[0_26px_90px_rgba(23,89,86,0.16)] md:min-h-[calc(100dvh-2rem)] md:w-97.5 md:max-w-none md:rounded-[42px] md:border md:border-white/80">
         <AppTopHeader
           isLoggedIn={Boolean(session?.backendToken)}
           role={role}
         />
-        <div className="brand-retail-main min-h-svh pb-24">
-          {children}
-        </div>
+        <SiteShell>{children}</SiteShell>
       </div>
-    </div>
+    </SiteFrame>
   );
 }

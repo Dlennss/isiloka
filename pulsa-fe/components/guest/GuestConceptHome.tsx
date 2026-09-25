@@ -369,9 +369,9 @@ export function GuestConceptHome({
           )}
         </section>
 
-        <section className="mt-5 grid grid-cols-[72px_1fr] items-center gap-3 rounded-[22px] bg-[#dff8ef] px-4 py-4 shadow-[0_16px_34px_rgba(15,78,81,0.09)] min-[410px]:grid-cols-[78px_1fr_auto]">
-          <div className="relative grid h-[72px] w-[72px] shrink-0 place-items-center rounded-[20px] bg-[linear-gradient(135deg,#0f9d83,#36d091)] text-white shadow-[0_14px_26px_rgba(7,128,107,0.18)]">
-            <Gift className="h-10 w-10" strokeWidth={2.2} />
+        <section className="mt-5 grid grid-cols-[64px_minmax(0,1fr)_122px] items-center gap-3 rounded-[22px] bg-[#dff8ef] px-4 py-4 shadow-[0_16px_34px_rgba(15,78,81,0.09)]">
+          <div className="relative grid h-16 w-16 shrink-0 place-items-center rounded-[20px] bg-[linear-gradient(135deg,#0f9d83,#36d091)] text-white shadow-[0_14px_26px_rgba(7,128,107,0.18)]">
+            <Gift className="h-9 w-9" strokeWidth={2.2} />
             <span className="absolute -right-1 top-2 h-3 w-3 rounded-full bg-[#ffd34e]" />
             <span className="absolute bottom-2 left-2 h-2 w-2 rounded-full bg-[#fff6bd]" />
           </div>
@@ -383,7 +383,7 @@ export function GuestConceptHome({
           <Link
             href="/artikel"
             prefetch={false}
-            className="col-span-2 flex h-11 shrink-0 items-center justify-center gap-1 rounded-full bg-[#079c7f] px-4 text-[13px] font-black text-white! shadow-[0_12px_24px_rgba(0,141,111,0.18)] visited:text-white! min-[410px]:col-span-1"
+            className="flex h-11 shrink-0 items-center justify-center gap-1 rounded-full bg-[#079c7f] px-3 text-[13px] font-black text-white! shadow-[0_12px_24px_rgba(0,141,111,0.18)] visited:text-white!"
           >
             Lihat Promo
             <ChevronRight className="h-4 w-4" strokeWidth={3} />
