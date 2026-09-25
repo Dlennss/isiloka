@@ -2,21 +2,32 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { LucideIcon } from "lucide-react";
 import { History, House, Tag, UserRound } from "lucide-react";
 
 function navClass(active: boolean) {
   return active
-    ? "flex min-w-0 flex-col items-center gap-1 rounded-2xl px-2 py-1 text-[#057b73]! visited:text-[#057b73]!"
-    : "flex min-w-0 flex-col items-center gap-1 rounded-2xl px-2 py-1 text-[#7b8798]! transition visited:text-[#7b8798]! hover:text-[#057b73]!";
+    ? "flex h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] bg-[#edfbf7] px-2 text-[#057b73]! ring-1 ring-[#d5f3ee] visited:text-[#057b73]!"
+    : "flex h-[56px] min-w-0 flex-col items-center justify-center gap-1 rounded-[18px] px-2 text-[#7b8798]! transition visited:text-[#7b8798]! hover:bg-[#f4fbfa] hover:text-[#057b73]!";
 }
 
 const iconClass = "h-5 w-5";
-const textClass = "text-[11px] font-bold leading-none";
+const textClass = "text-[10.5px] font-bold leading-none";
 
-function iconShellClass(active: boolean) {
-  return active
-    ? "grid h-8 w-8 place-items-center rounded-2xl bg-[#e7fbf5] text-[#057b73] ring-1 ring-[#c8efe8]"
-    : "grid h-8 w-8 place-items-center rounded-2xl text-[#7b8798]";
+type NavItemProps = {
+  active: boolean;
+  href: string;
+  icon: LucideIcon;
+  label: string;
+};
+
+function NavItem({ active, href, icon: Icon, label }: NavItemProps) {
+  return (
+    <Link href={href} prefetch={false} className={navClass(active)}>
+      <Icon className={iconClass} strokeWidth={active ? 2.35 : 2} />
+      <span className={textClass}>{label}</span>
+    </Link>
+  );
 }
 
 type GuestBottomNavProps = {
@@ -36,34 +47,11 @@ export function GuestBottomNav({ isLoggedIn = false }: GuestBottomNavProps) {
 
   return (
     <section className="isiloka-bottom-nav fixed bottom-3 left-1/2 z-[90] w-[calc(100%-2rem)] max-w-[398px] -translate-x-1/2 overflow-hidden rounded-[28px] border border-white/90 bg-white/96 shadow-[0_14px_38px_rgba(13,71,70,0.14)] backdrop-blur-2xl">
-      <div className="grid grid-cols-4 px-4 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2.5">
-        <Link href="/" prefetch={false} className={navClass(homeActive)}>
-          <span className={iconShellClass(homeActive)}>
-            <House className={iconClass} fill={homeActive ? "currentColor" : "none"} strokeWidth={homeActive ? 2.1 : 1.9} />
-          </span>
-          <span className={textClass}>Beranda</span>
-        </Link>
-
-        <Link href="/transaksi" prefetch={false} className={navClass(historyActive)}>
-          <span className={iconShellClass(historyActive)}>
-            <History className={iconClass} strokeWidth={historyActive ? 2.1 : 1.9} />
-          </span>
-          <span className={textClass}>Riwayat</span>
-        </Link>
-
-        <Link href={promoHref} prefetch={false} className={navClass(promoActive)}>
-          <span className={iconShellClass(promoActive)}>
-            <Tag className={iconClass} strokeWidth={promoActive ? 2.1 : 1.9} />
-          </span>
-          <span className={textClass}>Promo</span>
-        </Link>
-
-        <Link href={accountHref} prefetch={false} className={navClass(accountActive)}>
-          <span className={iconShellClass(accountActive)}>
-            <UserRound className={iconClass} strokeWidth={accountActive ? 2.1 : 1.9} />
-          </span>
-          <span className={textClass}>Akun</span>
-        </Link>
+      <div className="grid grid-cols-4 gap-1 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2.5">
+        <NavItem active={homeActive} href="/" icon={House} label="Beranda" />
+        <NavItem active={historyActive} href="/transaksi" icon={History} label="Riwayat" />
+        <NavItem active={promoActive} href={promoHref} icon={Tag} label="Promo" />
+        <NavItem active={accountActive} href={accountHref} icon={UserRound} label="Akun" />
       </div>
     </section>
   );
