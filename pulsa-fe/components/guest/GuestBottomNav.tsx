@@ -36,8 +36,10 @@ type GuestBottomNavProps = {
 
 export function GuestBottomNav({ isLoggedIn = false }: GuestBottomNavProps) {
   const pathname = usePathname() || "";
-  const homeActive = pathname === "/";
-  const historyActive = pathname.startsWith("/transaksi");
+  const homeHref = isLoggedIn ? "/user" : "/";
+  const historyHref = isLoggedIn ? "/user/transaksi" : "/transaksi";
+  const homeActive = pathname === "/" || pathname === "/user";
+  const historyActive = pathname.startsWith("/transaksi") || pathname.startsWith("/user/transaksi");
   const accountHref = isLoggedIn ? "/user/account" : "/login";
   const promoHref = "/artikel";
   const promoActive = pathname.startsWith("/artikel");
@@ -48,8 +50,8 @@ export function GuestBottomNav({ isLoggedIn = false }: GuestBottomNavProps) {
   return (
     <section className="isiloka-bottom-nav fixed bottom-3 left-1/2 z-[90] w-[calc(100%-2rem)] max-w-[398px] -translate-x-1/2 overflow-hidden rounded-[28px] border border-white/90 bg-white/96 shadow-[0_14px_38px_rgba(13,71,70,0.14)] backdrop-blur-2xl">
       <div className="grid grid-cols-4 gap-1 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2.5">
-        <NavItem active={homeActive} href="/" icon={House} label="Beranda" />
-        <NavItem active={historyActive} href="/transaksi" icon={History} label="Riwayat" />
+        <NavItem active={homeActive} href={homeHref} icon={House} label="Beranda" />
+        <NavItem active={historyActive} href={historyHref} icon={History} label="Riwayat" />
         <NavItem active={promoActive} href={promoHref} icon={Tag} label="Promo" />
         <NavItem active={accountActive} href={accountHref} icon={UserRound} label="Akun" />
       </div>

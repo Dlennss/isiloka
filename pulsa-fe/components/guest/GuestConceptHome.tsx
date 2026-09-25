@@ -201,23 +201,17 @@ export function GuestConceptHome({
               href={user.isLoggedIn ? "/user/account" : "/login"}
               prefetch={false}
               aria-label={user.isLoggedIn ? "Akun" : "Masuk"}
-              className={
-                user.isLoggedIn
-                  ? "grid h-11 w-11 shrink-0 place-items-center overflow-hidden rounded-full bg-white text-sm font-black text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.09)] visited:text-[#087e8b]!"
-                  : "flex h-11 shrink-0 items-center gap-1.5 rounded-[17px] bg-white px-3 text-[13px] font-black text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.09)] visited:text-[#087e8b]!"
-              }
+              className="flex h-11 min-w-[82px] shrink-0 items-center justify-center gap-1.5 rounded-[17px] bg-white px-3 text-[13px] font-black text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.09)] visited:text-[#087e8b]!"
             >
               {user.isLoggedIn && user.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={user.image} alt="" className="h-full w-full object-cover" />
+                <img src={user.image} alt="" className="h-6 w-6 rounded-full object-cover" />
               ) : user.isLoggedIn ? (
-                <span>{initials(user.name, user.email)}</span>
+                <span className="grid h-6 w-6 place-items-center rounded-full bg-[#e7fbf5] text-[10px]">{initials(user.name, user.email)}</span>
               ) : (
-                <>
-                  <UserRound className="h-4 w-4" strokeWidth={2.4} />
-                  <span>Masuk</span>
-                </>
+                <UserRound className="h-4 w-4" strokeWidth={2.4} />
               )}
+              <span>{user.isLoggedIn ? "Akun" : "Masuk"}</span>
             </Link>
           </div>
         </header>
