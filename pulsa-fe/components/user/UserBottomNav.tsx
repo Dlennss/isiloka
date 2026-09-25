@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { LucideIcon } from "lucide-react";
-import { History, House, Tag, UserRound } from "lucide-react";
+import { History, House, UserRound } from "lucide-react";
 
 function navClass(active: boolean) {
   return active
@@ -37,16 +37,14 @@ function NavItem({ active, href, icon: Icon, label }: NavItemProps) {
 export function UserBottomNav() {
   const pathname = usePathname() || "";
   const trxActive = isActivePath(pathname, "/user/transaksi");
-  const promoActive = isActivePath(pathname, "/artikel");
   const accountActive = isActivePath(pathname, "/user/account");
   const homeActive = pathname === "/user";
 
   return (
     <section className="isiloka-bottom-nav fixed bottom-3 left-1/2 z-[90] w-[calc(100%-2rem)] max-w-[398px] -translate-x-1/2 overflow-hidden rounded-[28px] border border-white/90 bg-white/96 shadow-[0_14px_38px_rgba(13,71,70,0.14)] backdrop-blur-2xl">
-      <div className="grid grid-cols-4 gap-1 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2.5">
+      <div className="grid grid-cols-3 gap-1 px-3 pb-[calc(0.55rem+env(safe-area-inset-bottom))] pt-2.5">
         <NavItem active={homeActive} href="/user" icon={House} label="Beranda" />
         <NavItem active={trxActive} href="/user/transaksi" icon={History} label="Riwayat" />
-        <NavItem active={promoActive} href="/artikel" icon={Tag} label="Promo" />
         <NavItem active={accountActive} href="/user/account" icon={UserRound} label="Akun" />
       </div>
     </section>
