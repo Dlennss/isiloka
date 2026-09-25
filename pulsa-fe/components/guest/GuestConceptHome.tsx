@@ -32,6 +32,15 @@ const services = [
   { href: "/kategori", label: "Lainnya", icon: Grid2X2, tone: "bg-[#dffff2] text-[#15b884]" },
 ];
 
+const userServices = [
+  { href: "/user/pulsa-data", label: "Pulsa & Data", icon: Smartphone, tone: "bg-[#dcfff4] text-[#12b98a]" },
+  { href: "/user/listrik/token", label: "Token Listrik", icon: Zap, tone: "bg-[#fff1cc] text-[#ffac18]" },
+  { href: "/user/ewallet", label: "E-Wallet", icon: CreditCard, tone: "bg-[#eee3ff] text-[#7654e8]" },
+  { href: "/user/kategori", label: "Tagihan", icon: FileText, tone: "bg-[#e2f4ff] text-[#269be8]" },
+  { href: "/user/kategori", label: "Paket Internet", icon: Wifi, tone: "bg-[#ffe3ed] text-[#ee4770]" },
+  { href: "/user/kategori", label: "Lainnya", icon: Grid2X2, tone: "bg-[#dffff2] text-[#15b884]" },
+];
+
 type HomeUser =
   | {
       isLoggedIn: true;
@@ -146,12 +155,18 @@ function ServiceCard({
 export function GuestConceptHome({
   user = { isLoggedIn: false },
   recentOrders = [],
+  userMode = false,
 }: {
   user?: HomeUser;
   recentOrders?: UserAppOrder[];
+  userMode?: boolean;
 }) {
   const displayName = user.isLoggedIn ? shortName(user.name || user.email) : "";
   const activities = recentOrders.slice(0, 3).map(mapOrderToActivity);
+  const serviceItems = userMode ? userServices : services;
+  const transactionHref = userMode ? "/user/transaksi" : "/transaksi";
+  const categoryHref = userMode ? "/user/kategori" : "/kategori";
+  const primaryOrderHref = userMode ? "/user/pulsa-data" : "/pulsa-data";
 
   return (
     <main className="isiloka-home mx-auto min-h-dvh w-full max-w-[430px] overflow-hidden bg-[radial-gradient(circle_at_50%_0%,#fafffe_0%,#f1fffb_44%,#e7f8f4_100%)] px-4 pb-28 pt-4 text-[#071d38] shadow-[0_20px_70px_rgba(8,91,84,0.14)] md:rounded-[34px]">
@@ -174,7 +189,7 @@ export function GuestConceptHome({
 
           <div className="flex shrink-0 items-center gap-2">
             <Link
-              href={user.isLoggedIn ? "/transaksi" : "/login"}
+              href={user.isLoggedIn ? transactionHref : "/login"}
               prefetch={false}
               aria-label="Notifikasi"
               className="relative grid h-11 w-11 place-items-center rounded-[17px] bg-white text-[#087e8b]! shadow-[0_14px_32px_rgba(12,68,75,0.11)] visited:text-[#087e8b]!"
@@ -256,7 +271,7 @@ export function GuestConceptHome({
                 <Send className="h-7 w-7 shrink-0 fill-[#0a7d76] text-[#0a7d76]" strokeWidth={1.8} />
                 <span>Transfer</span>
               </Link>
-              <Link href={user.isLoggedIn ? "/transaksi" : "/login"} prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
+              <Link href={user.isLoggedIn ? transactionHref : "/login"} prefetch={false} className="flex h-[60px] items-center justify-center gap-2 rounded-xl bg-white px-2 text-[13px] font-black text-[#075862]! shadow-[0_10px_24px_rgba(6,77,70,0.12)] visited:text-[#075862]!">
                 <ReceiptText className="h-7 w-7 shrink-0 fill-[#0a7d76] text-white" strokeWidth={2.2} />
                 <span>Riwayat</span>
               </Link>
@@ -274,7 +289,7 @@ export function GuestConceptHome({
                 Isi pulsa, paket data, token listrik dan berbagai pembayaran lainnya.
               </p>
               <Link
-                href="/pulsa-data"
+                href={primaryOrderHref}
                 prefetch={false}
                 className="mt-4 inline-flex h-11 items-center gap-2 rounded-full bg-[#079c7f] px-5 text-[15px] font-extrabold text-white! shadow-[0_12px_24px_rgba(0,141,111,0.22)] visited:text-white!"
               >
@@ -320,22 +335,22 @@ export function GuestConceptHome({
         </div>
 
         <section className="mt-5">
-          <SectionTitle title="Layanan Favorit" href="/kategori" />
+          <SectionTitle title="Layanan Favorit" href={categoryHref} />
           <div className="grid grid-cols-3 gap-3">
-            {services.map((service) => (
+            {serviceItems.map((service) => (
               <ServiceCard key={service.label} {...service} />
             ))}
           </div>
         </section>
 
         <section className="mt-5 rounded-[22px] bg-white px-4 py-4 shadow-[0_16px_36px_rgba(15,78,81,0.10)]">
-          <SectionTitle title="Aktivitas Terakhir" href="/transaksi" />
+          <SectionTitle title="Aktivitas Terakhir" href={transactionHref} />
           {user.isLoggedIn && activities.length > 0 ? (
             <div className="divide-y divide-[#e5eef0]">
               {activities.map((activity) => {
                 const Icon = activity.icon;
                 return (
-                  <Link key={`${activity.title}-${activity.time}`} href="/transaksi" prefetch={false} className="grid grid-cols-[44px_1fr_auto] items-center gap-3 py-3 first:pt-1 last:pb-0">
+                  <Link key={`${activity.title}-${activity.time}`} href={transactionHref} prefetch={false} className="grid grid-cols-[44px_1fr_auto] items-center gap-3 py-3 first:pt-1 last:pb-0">
                     <span className={`grid h-11 w-11 place-items-center rounded-full ${activity.tone}`}>
                       <Icon className="h-6 w-6" strokeWidth={2.3} />
                     </span>
