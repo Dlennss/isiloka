@@ -139,16 +139,15 @@ function ServiceCard({
   tone: string;
 }) {
   return (
-    <Link
+    <a
       href={href}
-      prefetch={false}
-      className="flex min-h-[112px] flex-col items-center justify-center rounded-[18px] bg-white px-2 text-center text-[#0a1e38]! shadow-[0_13px_28px_rgba(15,78,81,0.09)] visited:text-[#0a1e38]!"
+      className="relative z-20 flex min-h-[112px] touch-manipulation flex-col items-center justify-center rounded-[18px] bg-white px-2 text-center text-[#0a1e38]! shadow-[0_13px_28px_rgba(15,78,81,0.09)] visited:text-[#0a1e38]!"
     >
       <span className={`grid h-12 w-12 place-items-center rounded-[16px] ${tone}`}>
         <Icon className="h-7 w-7" strokeWidth={2.25} />
       </span>
       <span className="mt-2 block min-h-[32px] text-[13px] font-black leading-tight">{label}</span>
-    </Link>
+    </a>
   );
 }
 
