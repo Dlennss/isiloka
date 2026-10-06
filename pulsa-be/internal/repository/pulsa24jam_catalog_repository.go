@@ -56,12 +56,18 @@ ON CONFLICT (nama) DO UPDATE SET aktif = true, diubah_pada = now()
 	if _, err := tx.ExecContext(ctx, `UPDATE public.produk_provider_map SET aktif = false, diubah_pada = now() WHERE LOWER(TRIM(provider)) = 'pulsa24jam'`); err != nil {
 		return nil, err
 	}
+	if _, err := tx.ExecContext(ctx, `CREATE TEMP TABLE p24_catalog_sync_sku (sku TEXT PRIMARY KEY) ON COMMIT DROP`); err != nil {
+		return nil, err
+	}
 
 	synced := 0
 	for _, raw := range items {
 		item := normalizePulsa24JamCatalogItem(raw)
 		if item.SKU == "" || item.Name == "" {
 			continue
+		}
+		if _, err := tx.ExecContext(ctx, `INSERT INTO p24_catalog_sync_sku (sku) VALUES ($1) ON CONFLICT (sku) DO NOTHING`, item.SKU); err != nil {
+			return nil, err
 		}
 		categoryID, err := ensureCatalogMaster(ctx, tx, "kategori", item.CategoryName)
 		if err != nil {
@@ -80,22 +86,27 @@ ON CONFLICT (kategori_id) DO NOTHING
 			return nil, err
 		}
 
+		var nominal any
+		if item.PriceType == "FIXED" {
+			nominal = item.Price
+		}
 		var productID int64
 		err = tx.QueryRowContext(ctx, `
 INSERT INTO public.produk
   (sku, nama, group_name, kategori_id, brand_id, tipe_harga, nominal, maksimal_nominal, jam_buka, jam_tutup, aktif, dibuat_pada, diubah_pada)
-VALUES ($1,$2,$3,$4,$5,$6,NULL,$7,'00:00','23:59',true,now(),now())
+VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'00:00','23:59',true,now(),now())
 ON CONFLICT (sku) DO UPDATE SET
   nama = EXCLUDED.nama,
   group_name = EXCLUDED.group_name,
   kategori_id = EXCLUDED.kategori_id,
   brand_id = EXCLUDED.brand_id,
   tipe_harga = EXCLUDED.tipe_harga,
+  nominal = EXCLUDED.nominal,
   maksimal_nominal = EXCLUDED.maksimal_nominal,
   aktif = true,
   diubah_pada = now()
 RETURNING id
-`, item.SKU, item.Name, item.GroupName, categoryID, brandID, item.PriceType, item.MaximumNominal).Scan(&productID)
+`, item.SKU, item.Name, item.GroupName, categoryID, brandID, item.PriceType, nominal, item.MaximumNominal).Scan(&productID)
 		if err != nil {
 			return nil, err
 		}
@@ -144,6 +155,30 @@ ON CONFLICT (produk_id, provider, kode_provider) DO UPDATE SET
 	}
 	if synced == 0 {
 		return nil, fmt.Errorf("tidak ada produk Pulsa24Jam valid; sinkronisasi dibatalkan")
+	}
+	if _, err := tx.ExecContext(ctx, `
+UPDATE public.produk_app_pricing
+SET aktif = false, updated_at = now(), diubah_pada = now()
+WHERE aktif = true
+  AND LOWER(TRIM(provider)) <> 'pulsa24jam'
+`); err != nil {
+		return nil, err
+	}
+	if _, err := tx.ExecContext(ctx, `
+UPDATE public.produk_provider_map
+SET aktif = false, diubah_pada = now()
+WHERE aktif = true
+  AND LOWER(TRIM(provider)) <> 'pulsa24jam'
+`); err != nil {
+		return nil, err
+	}
+	if _, err := tx.ExecContext(ctx, `
+UPDATE public.produk
+SET aktif = false, diubah_pada = now()
+WHERE aktif = true
+  AND sku NOT IN (SELECT sku FROM p24_catalog_sync_sku)
+`); err != nil {
+		return nil, err
 	}
 	if err := tx.Commit(); err != nil {
 		return nil, err
