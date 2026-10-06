@@ -90,6 +90,11 @@ func TestResolvePulsa24JamAppRequest(t *testing.T) {
 			order:       repository.AppOrderRow{ProdukSKUSnapshot: "DANA", ProdukNamaSnapshot: "Dana Bebas Nominal", Qty: 25000, HargaDasar: 26000},
 			wantProduct: "DANA", wantQty: 25000,
 		},
+		{
+			name:        "fixed transfer pulsa sends denomination qty",
+			order:       repository.AppOrderRow{ProdukSKUSnapshot: "ATF15", ProdukNamaSnapshot: "AXIS TRANSFER PULSA 15.000", Qty: 1, HargaDasar: 16568},
+			wantProduct: "ATF15", wantQty: 15000,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -106,11 +111,21 @@ func TestPulsa24JamAppOrderRefIDFitsH2HRLimit(t *testing.T) {
 		ID:        81,
 		InvoiceID: "INV-20260921170504-F95D2B50",
 	})
-	if got != "PKA29" {
-		t.Fatalf("refid = %q, want %q", got, "PKA29")
+	if got != "PKA921170504F95D2B50" {
+		t.Fatalf("refid = %q, want %q", got, "PKA921170504F95D2B50")
 	}
 	if len(got) > 20 {
 		t.Fatalf("refid length = %d, want <= 20", len(got))
+	}
+}
+
+func TestPulsa24JamAppOrderRefIDUsesInvoiceBeforeID(t *testing.T) {
+	got := pulsa24JamAppOrderRefID(&repository.AppOrderRow{
+		ID:        10,
+		InvoiceID: "INV-20261006170913-D083278E",
+	})
+	if got != "PKA006170913D083278E" {
+		t.Fatalf("refid = %q, want %q", got, "PKA006170913D083278E")
 	}
 }
 

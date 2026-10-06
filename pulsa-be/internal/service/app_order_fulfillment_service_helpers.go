@@ -113,6 +113,16 @@ func resolvePulsa24JamAppRequest(providerProductCode string, order *repository.A
 
 	sku := strings.ToUpper(strings.TrimSpace(order.ProdukSKUSnapshot))
 	name := strings.ToUpper(strings.TrimSpace(order.ProdukNamaSnapshot))
+	if strings.Contains(name, "TRANSFER PULSA") {
+		match := pulsa24JamFixedWalletAmountPattern.FindStringSubmatch(sku)
+		if len(match) == 2 {
+			thousands, err := strconv.ParseInt(match[1], 10, 64)
+			if err == nil && thousands > 0 {
+				return providerProductCode, thousands * 1000
+			}
+		}
+	}
+
 	genericCode := ""
 	switch {
 	case strings.HasPrefix(sku, "UDDND") && strings.Contains(name, "DANA"):
@@ -139,10 +149,6 @@ func resolvePulsa24JamAppRequest(providerProductCode string, order *repository.A
 }
 
 func pulsa24JamAppOrderRefID(order *repository.AppOrderRow) string {
-	if order != nil && order.ID > 0 {
-		return "PKA" + strings.ToUpper(strconv.FormatInt(order.ID, 36))
-	}
-
 	invoice := ""
 	if order != nil {
 		invoice = order.InvoiceID
@@ -160,6 +166,9 @@ func pulsa24JamAppOrderRefID(order *repository.AppOrderRow) string {
 		}
 	}, invoice)
 	if invoice == "" {
+		if order != nil && order.ID > 0 {
+			return "PKA" + strings.ToUpper(strconv.FormatInt(order.ID, 36))
+		}
 		return "PKA"
 	}
 	if len(invoice) > 17 {
