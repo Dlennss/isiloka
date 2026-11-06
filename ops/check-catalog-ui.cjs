@@ -42,6 +42,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
       await page.screenshot({ path: path.join(os.tmpdir(), `isiloka-products-${width}.png`), fullPage: true });
       await buy.click();
       await page.getByText('Checkout', { exact: true }).waitFor({ timeout: 10000 });
+      await page.getByPlaceholder('Contoh: 10000').fill('10000');
+      await page.getByText('Rp 11.077', { exact: true }).waitFor();
       await page.screenshot({ path: path.join(os.tmpdir(), `isiloka-checkout-${width}.png`) });
       assert.deepEqual(errors, []);
       console.log(JSON.stringify({ width, categories: categories.length, providerImages: 'loaded', search: 'passed', checkoutOpenedWithoutSubmitting: true }));

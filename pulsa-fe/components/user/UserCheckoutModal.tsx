@@ -138,13 +138,13 @@ function getSummaryPrimaryLabel(product: UserProductItem) {
   if (category.includes("E-MONEY") || category.includes("PAKET") || category.includes("GAME") || category.includes("TV")) {
     return "Produk";
   }
-  return "Nominal pulsa";
+  return "Nominal";
 }
 
 function shouldShowSummaryPrimaryRow(product: UserProductItem) {
   const category = String(product.kategori_nama || "").toUpperCase();
   const upperName = String(product.nama || "").toUpperCase();
-  return !category.includes("E-MONEY") && !category.includes("PAKET DATA") && !category.includes("GAME") && !(category.includes("LISTRIK") && upperName.includes("TOKEN LISTRIK"));
+  return !category.includes("E-MONEY") && !category.includes("E-WALLET") && !category.includes("PAKET DATA") && !category.includes("GAME") && !(category.includes("LISTRIK") && upperName.includes("TOKEN LISTRIK"));
 }
 
 function getBillingDetailConfig(product: UserProductItem | null) {
@@ -426,11 +426,12 @@ export function UserCheckoutModal({
   const estimatedWalletDebit = effectiveAuthToken ? Math.min(hargaSebelumFeeAdmin, walletSaldo) : 0;
   const estimatedQrisAmount = effectiveAuthToken ? Math.max(hargaSebelumFeeAdmin - estimatedWalletDebit, 0) : 0;
   const needsTopup = Boolean(effectiveAuthToken) && estimatedQrisAmount > 0;
-  const feeAdminQris = 0;
-  const totalBayar = hargaSebelumFeeAdmin;
+  const feeAdminQris = hargaSebelumFeeAdmin > 0 && (!effectiveAuthToken || walletSaldo < hargaSebelumFeeAdmin)
+    ? Math.ceil(hargaSebelumFeeAdmin * 7 / 1000) : 0;
+  const totalBayar = hargaSebelumFeeAdmin + feeAdminQris;
   const ewalletProduct = isEwalletProduct(product);
-  const ewalletNominal = ewalletProduct ? Math.max(0, isFixed ? Number(product?.nominal || 0) : nominalValue) : 0;
-  const ewalletServiceFee = ewalletProduct ? Math.max(0, totalBayar - ewalletNominal) : 0;
+  const ewalletNominal = ewalletProduct && !isFixed ? Math.max(0, nominalValue) : 0;
+  const ewalletServiceFee = ewalletProduct && !isFixed ? baseCharge + feeActive : 0;
   const billingDisplayTotalTagihan = billingBillAmount > 0 ? billingBillAmount : billingTotalAmount;
   const billingDisplayAdminFee = billingTotalAmount > 0
     ? Math.max(totalBayar - billingDisplayTotalTagihan, 0)
@@ -1190,7 +1191,7 @@ export function UserCheckoutModal({
                   <span>Admin fee</span>
                   <span className="font-semibold text-slate-900">{formatRupiah(billingDisplayAdminFee)}</span>
                 </div>
-              ) : ewalletProduct ? (
+              ) : ewalletProduct && !isFixed ? (
                 <>
                   <div className="mt-2 flex items-center justify-between gap-3">
                     <span>Nominal masuk ke {product.brand_nama || "e-wallet"}</span>
