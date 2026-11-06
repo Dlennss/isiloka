@@ -1,8 +1,15 @@
 package service
 
 import (
+	"context"
+	"encoding/json"
+	"math"
+	"net/http"
+	"net/http/httptest"
+	"regexp"
 	"testing"
 
+	"pulsa2/internal/provider"
 	"pulsa2/internal/repository"
 )
 
@@ -107,15 +114,22 @@ func TestResolvePulsa24JamAppRequest(t *testing.T) {
 }
 
 func TestPulsa24JamAppOrderRefIDFitsH2HRLimit(t *testing.T) {
-	got := pulsa24JamAppOrderRefID(&repository.AppOrderRow{
-		ID:        81,
-		InvoiceID: "INV-20260921170504-F95D2B50",
-	})
-	if got != "PKA921170504F95D2B50" {
-		t.Fatalf("refid = %q, want %q", got, "PKA921170504F95D2B50")
-	}
-	if len(got) > 20 {
-		t.Fatalf("refid length = %d, want <= 20", len(got))
+	valid := regexp.MustCompile(`^PKA[A-Z0-9]{0,14}$`)
+	for _, order := range []*repository.AppOrderRow{
+		{ID: 1, InvoiceID: "INV-20261106173421-9AF1F343"},
+		{ID: 81, InvoiceID: "INV-20260921170504-F95D2B50"},
+		{InvoiceID: "ABCDEFGHIJKLMN"},
+		{InvoiceID: "ABCDEFGHIJKLMNO"},
+		{ID: math.MaxInt64},
+		nil,
+	} {
+		got := pulsa24JamAppOrderRefID(order)
+		if len(got) > 17 || !valid.MatchString(got) {
+			t.Fatalf("invalid H2HR refid %q (length %d)", got, len(got))
+		}
+		if again := pulsa24JamAppOrderRefID(order); again != got {
+			t.Fatalf("refid must be stable: %q != %q", got, again)
+		}
 	}
 }
 
@@ -124,17 +138,58 @@ func TestPulsa24JamAppOrderRefIDUsesInvoiceBeforeID(t *testing.T) {
 		ID:        10,
 		InvoiceID: "INV-20261006170913-D083278E",
 	})
-	if got != "PKA006170913D083278E" {
-		t.Fatalf("refid = %q, want %q", got, "PKA006170913D083278E")
+	want := pulsa24JamAppOrderRefID(&repository.AppOrderRow{ID: 99, InvoiceID: "INV-20261006170913-D083278E"})
+	if got != want {
+		t.Fatalf("same invoice must retain its refid: %q != %q", got, want)
+	}
+	otherDay := pulsa24JamAppOrderRefID(&repository.AppOrderRow{ID: 10, InvoiceID: "INV-20261007170913-D083278E"})
+	if got == otherDay {
+		t.Fatal("different invoice dates must not collapse to the same refid")
 	}
 }
 
 func TestPulsa24JamAppOrderRefIDFallbackFitsH2HRLimit(t *testing.T) {
 	got := pulsa24JamAppOrderRefID(&repository.AppOrderRow{InvoiceID: "INV-20260921170504-F95D2B50"})
-	if len(got) > 20 {
-		t.Fatalf("refid length = %d, want <= 20: %s", len(got), got)
+	if len(got) > 17 {
+		t.Fatalf("refid length = %d, want <= 17: %s", len(got), got)
 	}
 	if got[:3] != "PKA" {
 		t.Fatalf("refid = %q, want PKA prefix", got)
+	}
+}
+
+func TestPulsa24JamAppOrderDispatchSendsSMBCompatibleReference(t *testing.T) {
+	order := &repository.AppOrderRow{ID: 1, InvoiceID: "INV-20261106173421-9AF1F343", Dest: "TEST-DEST", Qty: 20000}
+	var received struct {
+		Command string `json:"commands"`
+		Product string `json:"product"`
+		Dest    string `json:"dest"`
+		RefID   string `json:"refid"`
+		Qty     int64  `json:"qty"`
+	}
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&received); err != nil {
+			t.Error(err)
+			w.WriteHeader(http.StatusBadRequest)
+			return
+		}
+		w.Header().Set("Content-Type", "application/json")
+		if len(received.RefID) > 17 {
+			_, _ = w.Write([]byte(`{"ok":true,"status":3,"message":"refid terlalu panjang untuk H2HR SMB, maksimal 17 karakter"}`))
+			return
+		}
+		_, _ = w.Write([]byte(`{"ok":true,"status":1,"message":"Transaksi sedang diproses"}`))
+	}))
+	defer server.Close()
+	adapter := provider.NewPulsa24JamAdapter(provider.Pulsa24JamConfig{
+		BaseURL: server.URL + "/v2/trx", APIKey: "test-key", PIN: "123456",
+	})
+	svc := NewAppOrderFulfillmentService(nil, nil, nil, nil, nil, nil, adapter)
+	status, body, _, _, err := svc.callAppOrderProvider(context.Background(), "pulsa24jam", "GPCAD1000", order.Qty, order)
+	if err != nil || status != http.StatusOK || !appOrderProviderLooksLikePending("pulsa24jam", body) {
+		t.Fatalf("dispatch rejected: status=%d body=%s err=%v", status, body, err)
+	}
+	if received.RefID != pulsa24JamAppOrderRefID(order) || received.Command != "PAY" || received.Product != "GPCAD1000" || received.Qty != order.Qty || received.Dest != order.Dest {
+		t.Fatalf("unexpected provider payload: %+v", received)
 	}
 }

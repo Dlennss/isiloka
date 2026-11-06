@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"crypto/sha256"
 	"fmt"
 	"strconv"
 	"strings"
@@ -131,8 +132,11 @@ func pulsa24JamAppOrderRefID(order *repository.AppOrderRow) string {
 		}
 		return "PKA"
 	}
-	if len(invoice) > 17 {
-		invoice = invoice[len(invoice)-17:]
+	// H2HR SMB permits 17 characters including the PKA prefix. Hash the
+	// full invoice so different dates cannot collapse to the same suffix.
+	if len(invoice) > 14 {
+		digest := sha256.Sum256([]byte(invoice))
+		invoice = fmt.Sprintf("%X", digest[:7])
 	}
 	return "PKA" + invoice
 }
