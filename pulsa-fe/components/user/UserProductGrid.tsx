@@ -7,6 +7,7 @@ import type { UserProductItem } from "@/components/user/types";
 import { UserCheckoutModal } from "@/components/user/UserCheckoutModal";
 import { getDisplayProductName, getDisplayedFixedPrice } from "@/components/guest/product-card-shared";
 import { getRetailFeeForProduct } from "@/lib/retailRoles";
+import { EWalletProductCard } from "@/components/shared/EWalletProductCard";
 
 type UserProductGridProps = {
   items: UserProductItem[];
@@ -33,49 +34,6 @@ function isPackageStyleItem(item: UserProductItem) {
 function isEMoneyItem(item: UserProductItem) {
   const category = String(item.kategori_nama || "").toUpperCase();
   return category.includes("E-MONEY") || category.includes("E-WALLET");
-}
-
-function escapeRegExp(value: string) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-}
-
-function toTitleCase(value: string) {
-  return value
-    .toLowerCase()
-    .split(" ")
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join(" ");
-}
-
-function getEMoneyCardTitle(item: UserProductItem) {
-  if (item.tipe_harga === "OPEN_AMOUNT") {
-    const raw = String(item.nama || "").replace(/\s+/g, " ").trim();
-    const brand = String(item.brand_nama || "").trim();
-    let cleaned = raw;
-
-    if (brand) {
-      const compactBrand = brand.replace(/\s+/g, "");
-      const brandPatterns = [brand, compactBrand].filter(Boolean);
-      for (const pattern of brandPatterns) {
-        cleaned = cleaned.replace(new RegExp(`^${escapeRegExp(pattern)}\\s*`, "i"), "").trim();
-      }
-    }
-
-    return toTitleCase(cleaned || "Bebas Nominal");
-  }
-  return extractLargeNominalLabel(item);
-}
-
-function extractLargeNominalLabel(item: UserProductItem) {
-  const upper = String(item.nama || "").toUpperCase();
-  const dotted = upper.match(/(\d+(?:\.\d{3})+)/);
-  if (dotted) return dotted[1];
-
-  const compact = upper.match(/(\d+)\s*K\b/);
-  if (compact) return `${Number.parseInt(compact[1], 10)}.000`;
-
-  return new Intl.NumberFormat("id-ID").format(Number(item.nominal || 0));
 }
 
 function UserProductCard({
@@ -107,43 +65,8 @@ function UserProductCard({
   const displayName = getDisplayProductName(item);
 
   if (emoneyStyle) {
-    const nominalLabel = getEMoneyCardTitle(item);
-    const brandLabel = String(item.brand_nama || "E-Wallet").trim();
     return (
-      <button
-        type="button"
-        onClick={() => {
-          if (!canBuy) return;
-          onBuy(item);
-        }}
-        disabled={!canBuy}
-        className="group relative min-h-36 overflow-hidden rounded-[22px] border border-emerald-950/10 bg-white p-3 text-left shadow-[0_14px_30px_rgba(6,78,59,0.10)] transition-all duration-300 hover:-translate-y-0.5 hover:border-lime-300 hover:shadow-[0_18px_36px_rgba(6,78,59,0.16)] disabled:cursor-not-allowed disabled:opacity-60"
-      >
-        <div className="absolute inset-x-0 top-0 h-1.5 bg-linear-to-r from-[#13464b] via-[#087e8b] to-[#b8f138]" />
-        <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-lime-200/55 blur-2xl" />
-        <div className="relative flex h-full min-h-30 flex-col justify-between gap-3">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <p className="text-[10px] font-black uppercase tracking-[0.16em] text-[#087e8b]">Nominal Top Up</p>
-              <p className={item.tipe_harga === "OPEN_AMOUNT" ? "mt-2 line-clamp-2 text-[21px] font-black leading-tight text-slate-950" : "mt-2 text-[26px] font-black leading-none tracking-tight text-slate-950"}>
-                {nominalLabel}
-              </p>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <div>
-              <p className="line-clamp-1 text-[11px] font-bold text-slate-500">Top up {brandLabel}</p>
-              <p className="text-sm font-black text-[#13464b]">
-                {canBuy ? formatRupiah(finalPrice) : (buyBlockedLabel || "Lengkapi dulu")}
-              </p>
-            </div>
-            <span className="inline-flex h-8 w-full items-center justify-center rounded-2xl bg-[#13464b] px-3 text-xs font-black text-white shadow-[0_10px_20px_rgba(5,46,38,0.18)] transition group-hover:bg-[#087e8b]">
-              {canBuy ? (buyLabel || "Top Up") : (buyBlockedLabel || "Lengkapi dulu")}
-            </span>
-          </div>
-        </div>
-      </button>
+      <EWalletProductCard item={item} price={Number(item.harga_dasar_app) + feeActive} onBuy={onBuy} canBuy={canBuy} buyLabel={buyLabel || "Top Up"} blockedLabel={buyBlockedLabel || "Lengkapi dulu"} />
     );
   }
 

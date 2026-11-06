@@ -51,8 +51,20 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
       await page.getByPlaceholder('Contoh: 10000').fill('10000');
       await page.getByText('Rp 11.077', { exact: true }).waitFor();
       await page.screenshot({ path: path.join(os.tmpdir(), `isiloka-checkout-${width}.png`) });
+      await page.goto(`${base}/ewallet/gopay`, { waitUntil: 'networkidle', timeout: 120000 });
+      const legacyCards = page.locator('article');
+      await legacyCards.first().waitFor();
+      const legacyFirst = await legacyCards.nth(0).boundingBox();
+      const legacySecond = await legacyCards.nth(1).boundingBox();
+      assert.equal(legacyFirst.y, legacySecond.y, 'legacy wallet cards must also use two columns');
+      assert.ok(Math.abs(legacyFirst.height - legacySecond.height) < 1);
+      assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
+      await legacyCards.first().scrollIntoViewIfNeeded();
+      await page.screenshot({ path: path.join(os.tmpdir(), `isiloka-ewallet-legacy-${width}.png`) });
+      await legacyCards.first().getByRole('button', { name: /Top Up/ }).click();
+      await page.getByText('Checkout', { exact: true }).waitFor();
       assert.deepEqual(errors, []);
-      console.log(JSON.stringify({ width, categories: categories.length, providerImages: 'loaded', search: 'passed', checkoutOpenedWithoutSubmitting: true }));
+      console.log(JSON.stringify({ width, categories: categories.length, providerImages: 'loaded', search: 'passed', legacyWalletCards: 'passed', checkoutOpenedWithoutSubmitting: true }));
       await page.close();
     }
   } finally {
