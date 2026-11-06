@@ -1,14 +1,15 @@
 # Isiloka deployment
 
 Target: `103.31.39.97`, Linux x86_64. GitHub Actions builds AMD64 artifacts.
-Repository Actions secrets must contain:
+The only required repository Actions secret is `SERVER_SSH_KEY`, containing
+the dedicated deployment private key including its BEGIN/END lines.
+Non-secret configuration is pinned in `.github/workflows/deploy.yml`:
 
-| Secret | Value |
+| Setting | Value |
 | --- | --- |
 | SERVER_HOST | `103.31.39.97` |
 | SERVER_PORT | `22` |
 | SERVER_USER | `root` |
-| SERVER_SSH_KEY | Dedicated deployment private key, including BEGIN/END lines |
 | BACKEND_SOURCE_DIR | `pulsa-be` |
 | FRONTEND_SOURCE_DIR | `pulsa-fe` |
 | FRONTEND_RELEASE_DIR | `/home/mitra-p24/hit/Isiloka/deployment/staging/frontend` |
@@ -16,9 +17,9 @@ Repository Actions secrets must contain:
 Source directories are relative to the repository checkout. The release directory
 is an absolute, dedicated staging path on the server, not the live frontend.
 The workflow rejects different paths before any rsync deletion can run.
-Folder secrets have defaults; remove obsolete values or replace them with the
-values above. `SERVER_PASSWORD` is no longer used: the server disables password
-authentication. Remove that obsolete secret after configuring `SERVER_SSH_KEY`.
+Old host, port, user and folder secrets are ignored and may be removed.
+`SERVER_PASSWORD` is also unused: the server disables password authentication.
+Do not use an old secret as a fallback for the deployment target.
 Never commit private keys, passwords or production environment files.
 
 The matching public key must be installed in root's `authorized_keys`. Use a

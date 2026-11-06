@@ -20,35 +20,24 @@ jobs:
     if: github.ref == 'refs/heads/main'
 
     env:
-      SERVER_HOST: ${{ secrets.SERVER_HOST }}
-      SERVER_PORT: ${{ secrets.SERVER_PORT }}
-      SERVER_USER: ${{ secrets.SERVER_USER }}
-      BACKEND_SOURCE_DIR: ${{ secrets.BACKEND_SOURCE_DIR || 'pulsa-be' }}
-      FRONTEND_SOURCE_DIR: ${{ secrets.FRONTEND_SOURCE_DIR || 'pulsa-fe' }}
-      FRONTEND_RELEASE_DIR: ${{ secrets.FRONTEND_RELEASE_DIR || '/home/mitra-p24/hit/Isiloka/deployment/staging/frontend' }}
+      SERVER_HOST: "103.31.39.97"
+      SERVER_PORT: "22"
+      SERVER_USER: root
+      BACKEND_SOURCE_DIR: pulsa-be
+      FRONTEND_SOURCE_DIR: pulsa-fe
+      FRONTEND_RELEASE_DIR: /home/mitra-p24/hit/Isiloka/deployment/staging/frontend
       BACKEND_RELEASE_DIR: /home/mitra-p24/hit/Isiloka/deployment/staging/pulsa-be
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Validate deployment secrets
+      - name: Validate deployment configuration
         shell: bash
         run: |
           set -euo pipefail
-          required=(
-            SERVER_HOST
-            SERVER_PORT
-            SERVER_USER
-          )
-          for name in "${required[@]}"; do
-            if [ -z "${!name:-}" ]; then
-              echo "::error::$name is empty. Add it in GitHub repository secrets."
-              exit 1
-            fi
-          done
           if [ "$SERVER_HOST" != "103.31.39.97" ] || [ "$SERVER_PORT" != "22" ] || [ "$SERVER_USER" != "root" ]; then
-            echo "::error::Update SERVER_HOST, SERVER_PORT and SERVER_USER for the new Isiloka server."
+            echo "::error::The workflow target does not match the pinned Isiloka server."
             exit 1
           fi
           if [ "$BACKEND_SOURCE_DIR" != "pulsa-be" ] || [ "$FRONTEND_SOURCE_DIR" != "pulsa-fe" ]; then
@@ -56,7 +45,7 @@ jobs:
             exit 1
           fi
           if [ "$FRONTEND_RELEASE_DIR" != "/home/mitra-p24/hit/Isiloka/deployment/staging/frontend" ]; then
-            echo "::error::Update FRONTEND_RELEASE_DIR to the new server's dedicated staging directory (see ops/DEPLOY.md)."
+            echo "::error::The workflow must use the dedicated Isiloka staging directory (see ops/DEPLOY.md)."
             exit 1
           fi
           if [ ! -f "${BACKEND_SOURCE_DIR}/go.sum" ]; then

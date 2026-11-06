@@ -2,6 +2,7 @@ import contextlib
 import io
 from pathlib import Path
 import runpy
+import re
 import sys
 import types
 import unittest
@@ -9,6 +10,24 @@ from unittest.mock import MagicMock, patch
 
 
 SCRIPT = Path(__file__).with_name('isiloka-activate.py')
+
+
+class WorkflowConfigurationTests(unittest.TestCase):
+    def test_stale_secrets_cannot_override_server_or_paths(self):
+        workflow = (SCRIPT.parent.parent / '.github/workflows/deploy.yml').read_text()
+        self.assertEqual(set(re.findall(r'secrets\.([A-Z_]+)', workflow)), {'SERVER_SSH_KEY'})
+        expected = {
+            'SERVER_HOST': '"103.31.39.97"',
+            'SERVER_PORT': '"22"',
+            'SERVER_USER': 'root',
+            'BACKEND_SOURCE_DIR': 'pulsa-be',
+            'FRONTEND_SOURCE_DIR': 'pulsa-fe',
+            'FRONTEND_RELEASE_DIR': '/home/mitra-p24/hit/Isiloka/deployment/staging/frontend',
+            'BACKEND_RELEASE_DIR': '/home/mitra-p24/hit/Isiloka/deployment/staging/pulsa-be',
+        }
+        for name, value in expected.items():
+            with self.subTest(setting=name):
+                self.assertIn(f'      {name}: {value}\n', workflow)
 
 
 class DeploymentPreflightTests(unittest.TestCase):
