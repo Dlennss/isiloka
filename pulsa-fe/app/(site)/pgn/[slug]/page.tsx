@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -19,7 +20,7 @@ type PageProps = {
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const brands = await getBrandsByKategori("20");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Tagihan Gas"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("20", brands, slug);
   if (!brand) {
@@ -40,12 +41,12 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PGNBrandPage({ params }: PageProps) {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("20");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Tagihan Gas"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("20", brands, slug);
   if (!brand) notFound();
 
-  const items = await getProductsByBrand("20", String(brand.id));
+  const items = await getProductsByBrand(await getCategoryIdByName("Tagihan Gas"), String(brand.id));
   const collectionJsonLd = buildCollectionJsonLd({
     title: `${brand.nama} | Tagihan PGN Isiloka`,
     description: `Cek dan bayar tagihan ${brand.nama} di Isiloka dengan proses yang ringkas.`,

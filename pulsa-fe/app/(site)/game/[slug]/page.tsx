@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
@@ -33,7 +34,7 @@ function getLowestPrice(products: UserProductItem[]) {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const brands = await getBrandsByKategori("5");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Game"));
   const { slug } = await params;
   const brand = findGameBrandBySlug(brands, slug);
   if (!brand) {
@@ -44,7 +45,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     });
   }
 
-  const products = prepareGameProducts(await getProductsByBrand("5", String(brand.id)));
+  const products = prepareGameProducts(await getProductsByBrand(await getCategoryIdByName("Game"), String(brand.id)));
   const lowestPrice = getLowestPrice(products);
   const brandTitle = toTitleCase(brand.nama);
 
@@ -108,13 +109,13 @@ export default async function GameBrandPage({ params, searchParams }: PageProps)
   const { slug } = await params;
   const initialDest = String((await searchParams)?.dest || "").replace(/[^a-zA-Z0-9]/g, "").slice(0, 32);
 
-  const brands = await getBrandsByKategori("5");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Game"));
   const brand = findGameBrandBySlug(brands, slug);
   if (!brand) {
     notFound();
   }
 
-  const products = prepareGameProducts(await getProductsByBrand("5", String(brand.id)));
+  const products = prepareGameProducts(await getProductsByBrand(await getCategoryIdByName("Game"), String(brand.id)));
   const brandTitle = toTitleCase(brand.nama);
   const brandLogo = getBrandLogo(brand.nama);
   const collectionJsonLd = buildCollectionJsonLd({

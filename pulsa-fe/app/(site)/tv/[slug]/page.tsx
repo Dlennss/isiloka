@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -21,7 +22,7 @@ type PageProps = {
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const brands = await getBrandsByKategori("7");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("TV & Streaming"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("7", brands, slug);
   if (!brand) {
@@ -65,12 +66,12 @@ export default async function TVBrandPage({ params }: PageProps) {
   const isLoggedIn = Boolean(session?.backendToken);
   const backendToken = session?.backendToken;
   const buyerRole = String(session?.user?.role || "").trim().toLowerCase();
-  const brands = await getBrandsByKategori("7");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("TV & Streaming"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("7", brands, slug);
   if (!brand) notFound();
 
-  const products = await getProductsByBrand("7", String(brand.id));
+  const products = await getProductsByBrand(await getCategoryIdByName("TV & Streaming"), String(brand.id));
   const useBillingFlow = shouldUseTvBillingFlow(products);
   const collectionJsonLd = buildCollectionJsonLd({
     title: `${brand.nama} | TV Berlangganan Isiloka`,

@@ -47,6 +47,9 @@ func (s *AppOrderService) Create(ctx context.Context, in repository.AppOrderCrea
 	if !pricingRow.Aktif {
 		return nil, fmt.Errorf("produk tidak aktif")
 	}
+	if err := validateDisplayedPulsa24JamQuote(in, produk.TipeHarga, pricingRow.Harga); err != nil {
+		return nil, err
+	}
 	if !strings.EqualFold(strings.TrimSpace(pricingRow.Provider), "pulsa24jam") {
 		return nil, fmt.Errorf("produk retail wajib memakai provider Pulsa24Jam")
 	}
@@ -56,6 +59,10 @@ func (s *AppOrderService) Create(ctx context.Context, in repository.AppOrderCrea
 	}
 	liveProduct, err := s.validatePulsa24JamProduct(ctx, providerCode)
 	if err != nil {
+		return nil, err
+	}
+
+	if err := validatePulsa24JamQuote(produk, pricingRow.Harga, liveProduct); err != nil {
 		return nil, err
 	}
 
@@ -84,15 +91,6 @@ func (s *AppOrderService) Create(ctx context.Context, in repository.AppOrderCrea
 	}
 
 	hargaDasar := pricingRow.Harga
-	if liveProduct != nil {
-		if liveProduct.AppBasePrice != nil {
-			hargaDasar = *liveProduct.AppBasePrice
-		} else if liveProduct.Price != nil {
-			hargaDasar = *liveProduct.Price
-		} else if liveProduct.AdditionalFee != nil {
-			hargaDasar = *liveProduct.AdditionalFee
-		}
-	}
 	isCheckProduct := isAppCheckProduct(produk)
 	billingAmount, err := s.resolveBillingAmountFromSourceCheck(ctx, produk, buyerType, memberID, in)
 	if err != nil {

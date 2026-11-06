@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -29,7 +30,7 @@ function getLowestPrice(products: Awaited<ReturnType<typeof getProductsByBrand>>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const brands = await getBrandsByKategori("8");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Aktivasi Perdana"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("8", brands, slug);
   if (!brand) {
@@ -40,7 +41,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     });
   }
 
-  const products = await getProductsByBrand("8", String(brand.id));
+  const products = await getProductsByBrand(await getCategoryIdByName("Aktivasi Perdana"), String(brand.id));
   const lowestPrice = getLowestPrice(products);
   const brandTitle = toTitleCase(brand.nama);
 
@@ -57,11 +58,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function AktivasiPerdanaBrandPage({ params }: PageProps) {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("8");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Aktivasi Perdana"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("8", brands, slug);
   if (!brand) notFound();
-  const products = await getProductsByBrand("8", String(brand.id));
+  const products = await getProductsByBrand(await getCategoryIdByName("Aktivasi Perdana"), String(brand.id));
   const brandTitle = toTitleCase(brand.nama);
   const collectionJsonLd = buildCollectionJsonLd({
     title: `Aktivasi Perdana ${brandTitle} | Isiloka`,
@@ -104,7 +105,7 @@ export default async function AktivasiPerdanaBrandPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <div className="space-y-4 px-4 pt-4">
         <GuestPaketDataQuickOrder
-          kategoriId="8"
+          kategoriId={await getCategoryIdByName("Aktivasi Perdana")}
           brands={brands}
           authToken={session?.backendToken}
           buyerRole={session?.user?.role}

@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
@@ -21,7 +22,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function AktivasiPerdanaPage() {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("8");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Aktivasi Perdana"));
   const collectionJsonLd = buildCollectionJsonLd({
     title: "Aktivasi Perdana | Isiloka",
     description: "Pilih produk aktivasi perdana semua operator di Isiloka dengan pilihan yang ringkas dan jelas.",
@@ -44,7 +45,7 @@ export default async function AktivasiPerdanaPage() {
           </section>
         ) : (
           <GuestPaketDataQuickOrder
-            kategoriId="8"
+            kategoriId={await getCategoryIdByName("Aktivasi Perdana")}
             brands={brands}
             authToken={session?.backendToken}
             buyerRole={session?.user?.role}

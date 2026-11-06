@@ -71,14 +71,14 @@ func TestResolvePulsa24JamAppRequest(t *testing.T) {
 		wantQty     int64
 	}{
 		{
-			name:        "fixed dana uses open amount route",
+			name:        "fixed dana keeps selected H2HR SKU",
 			order:       repository.AppOrderRow{ProdukSKUSnapshot: "UDDND10", ProdukNamaSnapshot: "Dana 10.000", Qty: 1, HargaDasar: 11055},
-			wantProduct: "DANA", wantQty: 10000,
+			wantProduct: "UDDND10", wantQty: 1,
 		},
 		{
-			name:        "fixed gopay uses open amount route",
+			name:        "fixed gopay keeps selected H2HR SKU",
 			order:       repository.AppOrderRow{ProdukSKUSnapshot: "UDGP10", ProdukNamaSnapshot: "Gopay 10.000", Qty: 1, HargaDasar: 11650},
-			wantProduct: "GOPAY", wantQty: 10000,
+			wantProduct: "UDGP10", wantQty: 1,
 		},
 		{
 			name:        "gopay driver keeps dedicated route",
@@ -91,9 +91,9 @@ func TestResolvePulsa24JamAppRequest(t *testing.T) {
 			wantProduct: "DANA", wantQty: 25000,
 		},
 		{
-			name:        "fixed transfer pulsa sends denomination qty",
+			name:        "fixed transfer pulsa keeps unit quantity",
 			order:       repository.AppOrderRow{ProdukSKUSnapshot: "ATF15", ProdukNamaSnapshot: "AXIS TRANSFER PULSA 15.000", Qty: 1, HargaDasar: 16568},
-			wantProduct: "ATF15", wantQty: 15000,
+			wantProduct: "ATF15", wantQty: 1,
 		},
 	}
 	for _, tt := range tests {

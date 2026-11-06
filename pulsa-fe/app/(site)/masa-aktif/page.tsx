@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
@@ -21,7 +22,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function MasaAktifPage() {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("9");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Masa Aktif"));
   const collectionJsonLd = buildCollectionJsonLd({
     title: "Masa Aktif Semua Operator | Isiloka",
     description: "Perpanjang masa aktif nomor Anda di Isiloka dengan pilihan operator dan nominal yang jelas.",
@@ -44,7 +45,7 @@ export default async function MasaAktifPage() {
           </section>
         ) : (
           <GuestPaketDataQuickOrder
-            kategoriId="9"
+            kategoriId={await getCategoryIdByName("Masa Aktif")}
             brands={brands}
             authToken={session?.backendToken}
             buyerRole={session?.user?.role}

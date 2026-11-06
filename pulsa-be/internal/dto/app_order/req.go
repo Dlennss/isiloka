@@ -1,6 +1,8 @@
 package apporderdto
 
 type CreateRequest struct {
+	ExpectedBasePrice    *int64 `json:"expected_base_price"`
+	ExpectedPriceType    string `json:"expected_price_type"`
 	ProdukID             int64  `json:"produk_id"`
 	Dest                 string `json:"dest"`
 	Qty                  int64  `json:"qty"`

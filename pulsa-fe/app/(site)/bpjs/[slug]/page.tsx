@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
 import type { UserSession } from "@/components/user/types";
-import { getProductsByBrand } from "@/lib/api.products";
+import { getProductsByBrand, getBrandsByKategori, getCategoryIdByName } from "@/lib/api.products";
 import { BPJSBrandFlow } from "@/components/shared/BPJSBrandFlow";
 import { GuestBottomNav } from "@/components/guest/GuestBottomNav";
 import { buildBreadcrumbJsonLd, buildCollectionJsonLd, buildPageMetadata } from "@/lib/site-search";
@@ -44,8 +44,11 @@ export default async function BPJSSlugPage({ params }: PageProps) {
     notFound();
   }
 
-  const items = await getProductsByBrand("19", "171");
   const title = slug === "kesehatan" ? "BPJS Kesehatan" : "BPJS Ketenagakerjaan";
+  const categoryId = await getCategoryIdByName("BPJS");
+  const brands = await getBrandsByKategori(categoryId);
+  const brand = brands.find((item) => item.nama.toLowerCase() === title.toLowerCase());
+  const items = brand ? await getProductsByBrand(categoryId, String(brand.id)) : [];
   const collectionJsonLd = buildCollectionJsonLd({
     title: `${title} | Isiloka`,
     description: `Cek dan bayar ${title} di Isiloka dengan alur yang ringkas.`,

@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { getBrandsByKategori } from "@/lib/api.products";
 import { PdamBrandSearch } from "@/components/guest/PdamBrandSearch";
@@ -13,7 +14,7 @@ export const metadata: Metadata = buildPageMetadata({
 });
 
 export default async function PDAMPage() {
-  const brands = await getBrandsByKategori("17");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Tagihan Air"));
   const collectionJsonLd = buildCollectionJsonLd({
     title: "Tagihan PDAM | Isiloka",
     description: "Cek dan bayar tagihan PDAM berbagai daerah di Isiloka dengan langkah yang ringkas dan pilihan wilayah yang jelas.",

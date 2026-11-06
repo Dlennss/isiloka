@@ -2,6 +2,8 @@ package main
 
 import (
 	"bufio"
+	"crypto/sha256"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -22,25 +24,44 @@ type productRow struct {
 	MaximumNominal string
 }
 
-var priceLinePattern = regexp.MustCompile(`^(?:\+\s*)?Rp\s*([0-9.]+)$`)
+var priceLinePattern = regexp.MustCompile(`^(?:\+\s*)?Rp\s*([0-9]+|[0-9]{1,3}(?:\.[0-9]{3})+)$`)
 
 func main() {
 	log.SetFlags(0)
-	if len(os.Args) != 3 {
-		log.Fatal("usage: go run ./scripts/pulsa24jam_catalog_from_dashboard <pasted-text.txt> <output.sql>")
+	if len(os.Args) != 4 {
+		log.Fatal("usage: go run ./scripts/pulsa24jam_catalog_from_dashboard <pasted-text.txt> <output.sql> <audit.json>")
 	}
 
 	inputPath := filepath.Clean(os.Args[1])
 	outputPath := filepath.Clean(os.Args[2])
 
-	lines, err := readLines(inputPath)
+	raw, err := os.ReadFile(inputPath)
 	if err != nil {
-		log.Fatalf("read %s: %v", inputPath, err)
+		log.Fatal(err)
 	}
-
-	products := parseDashboardProducts(lines)
-	if len(products) == 0 {
-		log.Fatal("no Pulsa24Jam products parsed")
+	var products []productRow
+	if strings.HasSuffix(strings.ToLower(inputPath), ".json") {
+		products, err = parseLiveCatalog(raw)
+	} else {
+		var lines []string
+		lines, err = readLines(inputPath)
+		if err == nil {
+			products, err = parseDashboardStrict(lines)
+		}
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
+	audit := struct {
+		SourceSHA256 string       `json:"source_sha256"`
+		Products     []productRow `json:"products"`
+	}{fmt.Sprintf("%x", sha256.Sum256(raw)), products}
+	data, err := json.MarshalIndent(audit, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+	}
+	if err := os.WriteFile(os.Args[3], append(data, '\n'), 0644); err != nil {
+		log.Fatal(err)
 	}
 
 	if err := writeMigration(outputPath, products); err != nil {
@@ -283,7 +304,7 @@ func writeMigration(path string, products []productRow) error {
 	w := bufio.NewWriterSize(file, 1024*1024)
 	defer w.Flush()
 
-	fmt.Fprintln(w, "-- Generated from Pulsa24Jam H2HR dashboard export.")
+	fmt.Fprintln(w, "-- Generated from a validated Pulsa24Jam H2HR catalogue snapshot.")
 	fmt.Fprintln(w, "-- Re-run safe: refreshes the app catalog so active retail products are Pulsa24Jam H2HR only.")
 	fmt.Fprintln(w, "BEGIN;")
 	fmt.Fprintln(w, "")
@@ -291,6 +312,11 @@ func writeMigration(path string, products []productRow) error {
 	fmt.Fprintln(w, "  ADD COLUMN IF NOT EXISTS minimal_nominal BIGINT NULL;")
 	fmt.Fprintln(w, "ALTER TABLE public.produk_provider_map")
 	fmt.Fprintln(w, "  ADD COLUMN IF NOT EXISTS maksimal_nominal BIGINT NULL;")
+	fmt.Fprintln(w, "ALTER TABLE public.produk_provider_map")
+	fmt.Fprintln(w, "  ADD COLUMN IF NOT EXISTS mode TEXT,")
+	fmt.Fprintln(w, "  ADD COLUMN IF NOT EXISTS special_code TEXT,")
+	fmt.Fprintln(w, "  ADD COLUMN IF NOT EXISTS jam_buka TIME,")
+	fmt.Fprintln(w, "  ADD COLUMN IF NOT EXISTS jam_tutup TIME;")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "DO $$")
 	fmt.Fprintln(w, "BEGIN")
@@ -352,7 +378,7 @@ func writeMigration(path string, products []productRow) error {
 	}
 
 	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "CREATE TEMP TABLE p24_h2hr_seed_unique AS")
+	fmt.Fprintln(w, "CREATE TEMP TABLE p24_h2hr_seed_unique ON COMMIT DROP AS")
 	fmt.Fprintln(w, "SELECT DISTINCT ON (sku)")
 	fmt.Fprintln(w, "  category_name, brand_name, sku, product_name, group_name, price_type, price, maximum_nominal")
 	fmt.Fprintln(w, "FROM p24_h2hr_seed")
@@ -377,15 +403,15 @@ func writeMigration(path string, products []productRow) error {
 	fmt.Fprintln(w, "  AND sku NOT IN (SELECT sku FROM p24_h2hr_seed_unique);")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "INSERT INTO public.kategori (nama, aktif, dibuat_pada, diubah_pada)")
-	fmt.Fprintln(w, "SELECT DISTINCT ON (LOWER(TRIM(category_name))) category_name, true, now(), now()")
+	fmt.Fprintln(w, "SELECT DISTINCT ON (category_name) category_name, true, now(), now()")
 	fmt.Fprintln(w, "FROM p24_h2hr_seed_unique")
-	fmt.Fprintln(w, "ORDER BY LOWER(TRIM(category_name)), category_name")
+	fmt.Fprintln(w, "ORDER BY category_name")
 	fmt.Fprintln(w, "ON CONFLICT (nama) DO UPDATE SET aktif = true, diubah_pada = now();")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "INSERT INTO public.brand (nama, aktif, dibuat_pada, diubah_pada)")
-	fmt.Fprintln(w, "SELECT DISTINCT ON (LOWER(TRIM(brand_name))) brand_name, true, now(), now()")
+	fmt.Fprintln(w, "SELECT DISTINCT ON (brand_name) brand_name, true, now(), now()")
 	fmt.Fprintln(w, "FROM p24_h2hr_seed_unique")
-	fmt.Fprintln(w, "ORDER BY LOWER(TRIM(brand_name)), brand_name")
+	fmt.Fprintln(w, "ORDER BY brand_name")
 	fmt.Fprintln(w, "ON CONFLICT (nama) DO UPDATE SET aktif = true, diubah_pada = now();")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "INSERT INTO public.kategori_fee_app")
@@ -394,10 +420,11 @@ func writeMigration(path string, products []productRow) error {
 	fmt.Fprintln(w, "FROM p24_h2hr_seed_unique seed")
 	fmt.Fprintln(w, "JOIN LATERAL (")
 	fmt.Fprintln(w, "  SELECT id FROM public.kategori")
-	fmt.Fprintln(w, "  WHERE LOWER(TRIM(nama)) = LOWER(TRIM(seed.category_name))")
+	fmt.Fprintln(w, "  WHERE nama = seed.category_name")
 	fmt.Fprintln(w, "  ORDER BY id LIMIT 1")
 	fmt.Fprintln(w, ") k ON true")
-	fmt.Fprintln(w, "ON CONFLICT (kategori_id) DO UPDATE SET aktif = true, updated_at = now();")
+	fmt.Fprintln(w, "ON CONFLICT (kategori_id) DO UPDATE SET fee_master=0, fee_agent=0, fee_user=0, fee_non_user=0, aktif=true, updated_at=now();")
+	fmt.Fprintln(w, "UPDATE public.kategori_fee_app SET fee_master=0, fee_agent=0, fee_user=0, fee_non_user=0, updated_at=now() WHERE kategori_id IN (SELECT id FROM public.kategori WHERE LOWER(nama)='bebas nominal');")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "INSERT INTO public.produk")
 	fmt.Fprintln(w, "  (sku, nama, group_name, kategori_id, brand_id, tipe_harga, nominal, maksimal_nominal, jam_buka, jam_tutup, aktif, dibuat_pada, diubah_pada)")
@@ -407,12 +434,12 @@ func writeMigration(path string, products []productRow) error {
 	fmt.Fprintln(w, "FROM p24_h2hr_seed_unique seed")
 	fmt.Fprintln(w, "JOIN LATERAL (")
 	fmt.Fprintln(w, "  SELECT id FROM public.kategori")
-	fmt.Fprintln(w, "  WHERE LOWER(TRIM(nama)) = LOWER(TRIM(seed.category_name))")
+	fmt.Fprintln(w, "  WHERE nama = seed.category_name")
 	fmt.Fprintln(w, "  ORDER BY id LIMIT 1")
 	fmt.Fprintln(w, ") k ON true")
 	fmt.Fprintln(w, "JOIN LATERAL (")
 	fmt.Fprintln(w, "  SELECT id FROM public.brand")
-	fmt.Fprintln(w, "  WHERE LOWER(TRIM(nama)) = LOWER(TRIM(seed.brand_name))")
+	fmt.Fprintln(w, "  WHERE nama = seed.brand_name")
 	fmt.Fprintln(w, "  ORDER BY id LIMIT 1")
 	fmt.Fprintln(w, ") b ON true")
 	fmt.Fprintln(w, "ON CONFLICT (sku) DO UPDATE SET")
@@ -464,8 +491,13 @@ func writeMigration(path string, products []productRow) error {
 	fmt.Fprintln(w, "  fee_rp = 0,")
 	fmt.Fprintln(w, "  diubah_pada = now();")
 	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "DO $$ BEGIN")
+	fmt.Fprintf(w, "  IF (SELECT COUNT(*) FROM public.produk WHERE aktif) <> %d THEN RAISE EXCEPTION 'Catalog count mismatch'; END IF;\n", len(products))
+	fmt.Fprintln(w, "  IF EXISTS (SELECT 1 FROM p24_h2hr_seed_unique s LEFT JOIN public.produk p ON p.sku=s.sku LEFT JOIN public.kategori k ON k.id=p.kategori_id LEFT JOIN public.brand b ON b.id=p.brand_id LEFT JOIN public.produk_app_pricing a ON a.produk_id=p.id WHERE p.id IS NULL OR NOT p.aktif OR p.nama IS DISTINCT FROM s.product_name OR p.group_name IS DISTINCT FROM s.group_name OR p.tipe_harga::text IS DISTINCT FROM s.price_type OR p.maksimal_nominal IS DISTINCT FROM s.maximum_nominal OR k.nama IS DISTINCT FROM s.category_name OR b.nama IS DISTINCT FROM s.brand_name OR a.harga IS DISTINCT FROM s.price OR a.harga_dasar IS DISTINCT FROM s.price OR a.provider IS DISTINCT FROM 'pulsa24jam' OR a.aktif IS DISTINCT FROM true) THEN RAISE EXCEPTION 'Catalog field mismatch'; END IF;")
+	fmt.Fprintln(w, "  IF EXISTS (SELECT 1 FROM p24_h2hr_seed_unique s JOIN public.produk p ON p.sku=s.sku WHERE NOT EXISTS (SELECT 1 FROM public.produk_provider_map m WHERE m.produk_id=p.id AND m.provider='pulsa24jam' AND m.kode_provider=s.sku AND m.aktif)) THEN RAISE EXCEPTION 'Catalog route mismatch'; END IF;")
+	fmt.Fprintln(w, "END $$;")
 	fmt.Fprintln(w, "COMMIT;")
-	return nil
+	return w.Flush()
 }
 
 func sqlQuote(value string) string {

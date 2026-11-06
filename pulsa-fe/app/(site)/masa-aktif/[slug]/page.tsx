@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -30,7 +31,7 @@ function getLowestPrice(products: Awaited<ReturnType<typeof getProductsByBrand>>
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const brands = await getBrandsByKategori("9");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Masa Aktif"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("9", brands, slug);
   if (!brand) {
@@ -41,7 +42,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     });
   }
 
-  const products = await getProductsByBrand("9", String(brand.id));
+  const products = await getProductsByBrand(await getCategoryIdByName("Masa Aktif"), String(brand.id));
   const lowestPrice = getLowestPrice(products);
   const brandTitle = toTitleCase(brand.nama);
 
@@ -58,13 +59,13 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function MasaAktifBrandPage({ params }: PageProps) {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("9");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Masa Aktif"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("9", brands, slug);
   if (!brand) {
     notFound();
   }
-  const products = await getProductsByBrand("9", String(brand.id));
+  const products = await getProductsByBrand(await getCategoryIdByName("Masa Aktif"), String(brand.id));
   const brandTitle = toTitleCase(brand.nama);
   const collectionJsonLd = buildCollectionJsonLd({
     title: `Perpanjang Masa Aktif ${brandTitle} | Isiloka`,
@@ -113,7 +114,7 @@ export default async function MasaAktifBrandPage({ params }: PageProps) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
       <div className="space-y-4 px-4 pt-4">
         <GuestPaketDataQuickOrder
-          kategoriId="9"
+          kategoriId={await getCategoryIdByName("Masa Aktif")}
           brands={brands}
           authToken={session?.backendToken}
           buyerRole={session?.user?.role}

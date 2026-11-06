@@ -5,6 +5,21 @@ export type BrandLogoMeta = {
 };
 
 const BRAND_LOGOS: Record<string, BrandLogoMeta> = {
+  grab: {
+    src: "/brand-logos/grab-official.svg",
+    alt: "Logo Grab",
+    sourcePage: "https://www.grab.com/id/en/pressdownload/",
+  },
+  kaspro: {
+    src: "/brand-logos/kaspro-official.png",
+    alt: "Logo KasPro",
+    sourcePage: "https://www.kaspro.id/",
+  },
+  motionpay: {
+    src: "/brand-logos/motionpay-official.png",
+    alt: "Logo MotionPay",
+    sourcePage: "https://motionpay.id/",
+  },
   dana: {
     src: "/brand-logos/dana.svg",
     alt: "Logo DANA",
@@ -31,9 +46,9 @@ const BRAND_LOGOS: Record<string, BrandLogoMeta> = {
     sourcePage: "local:/public/images/providers/logo_tri.webp",
   },
   gopay: {
-    src: "/brand-logos/gopay.svg",
+    src: "/brand-logos/gopay-official.svg",
     alt: "Logo GoPay",
-    sourcePage: "https://commons.wikimedia.org/wiki/File:Gopay_logo.svg",
+    sourcePage: "https://gopay.co.id/media-kit",
   },
   indosat: {
     src: "/images/providers/logo_im3.webp",
@@ -81,14 +96,14 @@ const BRAND_LOGOS: Record<string, BrandLogoMeta> = {
     sourcePage: "https://commons.wikimedia.org/wiki/File:Shopee.svg",
   },
   shopeepay: {
-    src: "/brand-logos/shopee.svg",
+    src: "/brand-logos/shopeepay-official.svg",
     alt: "Logo ShopeePay",
-    sourcePage: "https://commons.wikimedia.org/wiki/File:Shopee.svg",
+    sourcePage: "https://shopeepay.co.id/",
   },
   "shopee pay": {
-    src: "/brand-logos/shopee.svg",
+    src: "/brand-logos/shopeepay-official.svg",
     alt: "Logo ShopeePay",
-    sourcePage: "https://commons.wikimedia.org/wiki/File:Shopee.svg",
+    sourcePage: "https://shopeepay.co.id/",
   },
   astrapay: {
     src: "/images/ewallet/logo_astrapay.svg",
@@ -389,6 +404,17 @@ function normalizeBrandName(name: string) {
 
 export function getBrandLogo(name: string): BrandLogoMeta | null {
   const key = normalizeBrandName(name);
+  const aliases: Record<string, string> = {
+    "indosat data freedom": "indosat",
+    "indosat data harian": "indosat",
+    "mobile legend br": "mobile legend",
+    "mobile legend ph": "mobile legend",
+    "roblox idr": "roblox",
+    "point blank cash": "point blank",
+    "magic chess : go go": "magic chess go go",
+  };
+  // Locally invented banners must not be presented as official brand marks.
+  if (["hago", "blood strike", "free fire max", "zepeto"].includes(key)) return null;
   const withoutBankPrefix = key.replace(/^bank\s+/, "");
-  return BRAND_LOGOS[key] ?? BRAND_LOGOS[withoutBankPrefix] ?? null;
+  return BRAND_LOGOS[aliases[key] || key] ?? BRAND_LOGOS[withoutBankPrefix] ?? null;
 }

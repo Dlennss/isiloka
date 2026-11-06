@@ -27,7 +27,13 @@ func (s *Pulsa24JamCatalogSyncService) Sync(ctx context.Context) (*repository.Pu
 	}
 	items := make([]repository.Pulsa24JamCatalogItem, 0, len(products))
 	for _, product := range products {
-		items = append(items, pulsa24JamCatalogItemFromProduct(product))
+		price, err := product.CatalogPrice()
+		if err != nil {
+			return nil, err
+		}
+		item := pulsa24JamCatalogItemFromProduct(product)
+		item.Price = price
+		items = append(items, item)
 	}
 	return s.repo.Sync(ctx, items)
 }

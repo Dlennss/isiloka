@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getServerSession } from "next-auth";
@@ -20,7 +21,7 @@ type PageProps = {
 };
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const brands = await getBrandsByKategori("18");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Pascabayar"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("18", brands, slug);
   if (!brand) {
@@ -44,12 +45,12 @@ export default async function HPPascabayarSlugPage({ params }: PageProps) {
   const isLoggedIn = Boolean(session?.backendToken);
   const backendToken = session?.backendToken;
   const buyerRole = String(session?.user?.role || "").trim().toLowerCase();
-  const brands = await getBrandsByKategori("18");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Pascabayar"));
   const { slug } = await params;
   const brand = findBrandByDedicatedSlug("18", brands, slug);
   if (!brand) notFound();
 
-  const items = await getProductsByBrand("18", String(brand.id));
+  const items = await getProductsByBrand(await getCategoryIdByName("Pascabayar"), String(brand.id));
   const brandTitle = toTitleCase(brand.nama);
   const collectionJsonLd = buildCollectionJsonLd({
     title: `${brandTitle} | HP Pascabayar Isiloka`,

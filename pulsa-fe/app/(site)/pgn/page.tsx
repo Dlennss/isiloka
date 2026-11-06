@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
@@ -25,9 +26,9 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function PGNPage() {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("20");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Tagihan Gas"));
   const pgnBrand = pickPGNBrand(brands);
-  const items = pgnBrand ? await getProductsByBrand("20", String(pgnBrand.id)) : [];
+  const items = pgnBrand ? await getProductsByBrand(await getCategoryIdByName("Tagihan Gas"), String(pgnBrand.id)) : [];
   const collectionJsonLd = buildCollectionJsonLd({
     title: "Tagihan PGN | Isiloka",
     description: "Cek dan bayar tagihan gas PGN di Isiloka dengan langkah pembayaran yang ringkas.",

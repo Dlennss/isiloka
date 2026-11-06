@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
@@ -22,7 +23,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function HPPascabayarPage() {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("18");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Pascabayar"));
   const collectionJsonLd = buildCollectionJsonLd({
     title: "HP Pascabayar | Isiloka",
     description: "Cek dan bayar tagihan HP pascabayar di Isiloka dengan pilihan operator yang jelas.",

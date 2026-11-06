@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
@@ -22,7 +23,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function TVPage() {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("7");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("TV & Streaming"));
   const collectionJsonLd = buildCollectionJsonLd({
     title: "TV Berlangganan | Isiloka",
     description: "Beli paket atau bayar layanan TV berlangganan di Isiloka dengan pilihan brand yang jelas.",

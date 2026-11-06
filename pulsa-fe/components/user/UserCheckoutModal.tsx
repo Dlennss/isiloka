@@ -269,6 +269,9 @@ async function ensureFreshProductAvailable(product: UserProductItem) {
   if (!freshProduct || !freshProduct.aktif) {
     throw new Error("produk tidak tersedia");
   }
+  if (freshProduct.sku !== product.sku || freshProduct.tipe_harga !== product.tipe_harga || Number(freshProduct.harga_dasar_app) !== Number(product.harga_dasar_app)) {
+    throw new Error("Harga atau jenis produk berubah. Muat ulang katalog sebelum membeli.");
+  }
 }
 
 export function UserCheckoutModal({
@@ -554,6 +557,8 @@ export function UserCheckoutModal({
 
       const orderPayload = {
         produk_id: currentProduct.id,
+        expected_base_price: Number(currentProduct.harga_dasar_app),
+        expected_price_type: currentProduct.tipe_harga,
         dest: finalDest,
         qty: isFixed ? 1 : nominalValue,
         ...(isBillingPayment && billingCheckRefId ? { source_check_ref_id: billingCheckRefId } : {}),

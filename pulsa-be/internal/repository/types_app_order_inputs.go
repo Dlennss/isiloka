@@ -36,6 +36,8 @@ type AppBillingCheckUpdateInput struct {
 }
 
 type AppOrderCreateInput struct {
+	ExpectedBasePrice      *int64
+	ExpectedPriceType      string
 	ID                     int64
 	InvoiceID              string
 	MemberID               *int64

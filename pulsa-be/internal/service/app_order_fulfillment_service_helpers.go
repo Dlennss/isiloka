@@ -3,7 +3,6 @@ package service
 import (
 	"context"
 	"fmt"
-	"regexp"
 	"strconv"
 	"strings"
 
@@ -11,8 +10,6 @@ import (
 	providerpkg "pulsa2/internal/provider"
 	"pulsa2/internal/repository"
 )
-
-var pulsa24JamFixedWalletAmountPattern = regexp.MustCompile(`([0-9]+)$`)
 
 func (s *AppOrderFulfillmentService) handleFailedOrder(ctx context.Context, order *repository.AppOrderRow, providerTrxID int64, msg, reasonPrefix string) error {
 	if order == nil {
@@ -99,7 +96,7 @@ func appOrderProviderProductUnavailable(provider, body string) bool {
 }
 
 func resolvePulsa24JamAppRequest(providerProductCode string, order *repository.AppOrderRow) (string, int64) {
-	providerProductCode = strings.ToUpper(strings.TrimSpace(providerProductCode))
+	providerProductCode = strings.TrimSpace(providerProductCode)
 	if order == nil {
 		return providerProductCode, 0
 	}
@@ -107,45 +104,8 @@ func resolvePulsa24JamAppRequest(providerProductCode string, order *repository.A
 	if qty <= 0 {
 		qty = 1
 	}
-	if qty != 1 {
-		return providerProductCode, qty
-	}
-
-	sku := strings.ToUpper(strings.TrimSpace(order.ProdukSKUSnapshot))
-	name := strings.ToUpper(strings.TrimSpace(order.ProdukNamaSnapshot))
-	if strings.Contains(name, "TRANSFER PULSA") {
-		match := pulsa24JamFixedWalletAmountPattern.FindStringSubmatch(sku)
-		if len(match) == 2 {
-			thousands, err := strconv.ParseInt(match[1], 10, 64)
-			if err == nil && thousands > 0 {
-				return providerProductCode, thousands * 1000
-			}
-		}
-	}
-
-	genericCode := ""
-	switch {
-	case strings.HasPrefix(sku, "UDDND") && strings.Contains(name, "DANA"):
-		genericCode = "DANA"
-	case (strings.HasPrefix(sku, "UDGP") || strings.HasPrefix(sku, "UDGY")) && strings.Contains(name, "GOPAY") && !strings.Contains(name, "DRIVER"):
-		genericCode = "GOPAY"
-	default:
-		return providerProductCode, qty
-	}
-
-	match := pulsa24JamFixedWalletAmountPattern.FindStringSubmatch(sku)
-	if len(match) != 2 {
-		return providerProductCode, qty
-	}
-	thousands, err := strconv.ParseInt(match[1], 10, 64)
-	if err != nil || thousands <= 0 {
-		return providerProductCode, qty
-	}
-	amount := thousands * 1000
-	if amount <= 0 || (order.HargaDasar > 0 && amount >= order.HargaDasar) {
-		return providerProductCode, qty
-	}
-	return genericCode, amount
+	// SKU and quantity come from the selected H2HR product, never its display name.
+	return providerProductCode, qty
 }
 
 func pulsa24JamAppOrderRefID(order *repository.AppOrderRow) string {

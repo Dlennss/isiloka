@@ -1,3 +1,4 @@
+import { getCategoryIdByName } from "@/lib/api.products";
 import type { Metadata } from "next";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/nextauth";
@@ -22,7 +23,7 @@ export const metadata: Metadata = buildPageMetadata({
 
 export default async function InternetPascabayarPage() {
   const session = (await getServerSession(authOptions)) as SessionShape | null;
-  const brands = await getBrandsByKategori("3");
+  const brands = await getBrandsByKategori(await getCategoryIdByName("Internet & Telco"));
   const collectionJsonLd = buildCollectionJsonLd({
     title: "Internet Pascabayar | Isiloka",
     description: "Cek dan bayar tagihan internet pascabayar di Isiloka dengan pilihan provider yang jelas.",

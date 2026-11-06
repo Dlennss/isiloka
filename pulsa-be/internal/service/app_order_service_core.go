@@ -29,7 +29,7 @@ func (s *AppOrderService) SetPulsa24JamClient(client *provider.Pulsa24JamAdapter
 
 func (s *AppOrderService) validatePulsa24JamProduct(ctx context.Context, productCode string) (*provider.Pulsa24JamProduct, error) {
 	if s.pulsa24JamClient == nil || !s.pulsa24JamClient.Configured() {
-		return nil, nil
+		return nil, fmt.Errorf("pembelian belum tersedia: koneksi Pulsa24Jam belum dikonfigurasi")
 	}
 	items, err := s.pulsa24JamClient.Products(ctx, productCode)
 	if err != nil {
@@ -46,6 +46,31 @@ func (s *AppOrderService) validatePulsa24JamProduct(ctx context.Context, product
 }
 
 const appOrderPaymentFeeBps int64 = 7
+
+func validateDisplayedPulsa24JamQuote(in repository.AppOrderCreateInput, priceType string, price int64) error {
+	if (in.ExpectedBasePrice != nil && *in.ExpectedBasePrice != price) || (in.ExpectedPriceType != "" && in.ExpectedPriceType != priceType) {
+		return fmt.Errorf("harga atau jenis produk berubah; muat ulang katalog sebelum membeli")
+	}
+	return nil
+}
+
+func validatePulsa24JamQuote(product *repository.ProdukRow, price int64, live *provider.Pulsa24JamProduct) error {
+	if live == nil || product == nil {
+		return fmt.Errorf("produk Pulsa24Jam belum terverifikasi")
+	}
+	livePrice, err := live.CatalogPrice()
+	if err != nil {
+		return err
+	}
+	limitsMatch := product.MaksimalNominal == nil && live.MaximumNominal == nil
+	if product.MaksimalNominal != nil && live.MaximumNominal != nil {
+		limitsMatch = *product.MaksimalNominal == *live.MaximumNominal
+	}
+	if !live.Active || product.SKU != live.SKU || product.Nama != live.Name || product.TipeHarga != live.PriceType || price != livePrice || !limitsMatch {
+		return fmt.Errorf("produk atau harga Pulsa24Jam berubah; muat ulang katalog sebelum membeli")
+	}
+	return nil
+}
 
 func NewAppOrderService(
 	orderRepo *repository.AppOrderRepository,

@@ -35,11 +35,11 @@ export function ProviderBrandPicker({ items, layout = "grid", columns = 3 }: Pro
                 {logo ? (
                   <Image src={logo.src} alt={logo.alt} title={logo.alt} width={56} height={56} className="h-full w-full object-contain" />
                 ) : (
-                  <span className="text-base font-black uppercase tracking-tight text-sky-700">{brand.nama.slice(0, 2)}</span>
+                  <span aria-hidden="true" className="text-base font-bold uppercase tracking-normal text-sky-700">{brand.nama.slice(0, 2)}</span>
                 )}
               </div>
             </div>
-            {layout === "list" ? <span className="min-w-0 text-sm font-semibold text-slate-900">{brand.nama}</span> : null}
+            <span className={layout === "list" ? "min-w-0 break-words text-sm font-semibold text-slate-900" : "mt-2 flex min-h-10 items-center justify-center break-words text-xs font-semibold leading-5 text-slate-900"}>{brand.nama}</span>
           </Link>
         );
       })}
