@@ -27,7 +27,7 @@ def preflight():
     for unit in ['isiloka-web', 'isiloka-be']:
         state = subprocess.run(['systemctl', 'is-active', '--quiet', unit])
         if state.returncode:
-            raise SystemExit('Restore the database/backend and start ' + unit + ' before deploying')
+            raise SystemExit('Initialize the database/backend and start ' + unit + ' before deploying')
     for name in ['frontend.env', 'backend.env']:
         if not (Path('/etc/isiloka') / name).is_file():
             raise SystemExit('Missing server environment: ' + name)

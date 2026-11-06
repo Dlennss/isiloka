@@ -31,17 +31,29 @@ to this repository's trusted deployment workflow.
 If that key changes, verify the replacement through the server console before
 updating this file. Do not disable host verification.
 
-## Restore before deploying
+## Initialize before deploying
 
-Restore the old Isiloka database first. Do not create a replacement empty account
-database. Provision `/etc/isiloka/backend.env` and `/etc/isiloka/frontend.env`
-and the `isiloka-be` and `isiloka-web` services. The backend must listen on
+An existing installation can restore its database before deployment. On
+2026-11-06 the owner instead approved a new empty Isiloka database. The fresh
+installation uses `ops/bootstrap-isiloka.sql` and
+`bash ops/bootstrap-isiloka.sh --initialize-empty` on the target server.
+The installer refuses to overwrite an existing database, role or backend env.
+It does not delete databases on any other server or import legacy user data.
+
+Build the Linux AMD64 backend into `deployment/bootstrap/isiloka-api` first.
+The installer creates a dedicated unprivileged PostgreSQL role `isiloka`, uses
+local Unix-socket peer authentication, generates new JWT/admin secrets, and
+installs `ops/isiloka-be.service`. It creates no accounts, balances, banks or
+products. Provider and OAuth credentials must be configured separately.
+
+Both `/etc/isiloka/backend.env` and `/etc/isiloka/frontend.env` must exist,
+along with the `isiloka-be` and `isiloka-web` services. The backend must listen on
 `127.0.0.1:8102` and the frontend on `127.0.0.1:33128`.
 
 Install `ops/isiloka-activate.py` as root-owned mode 0755 at
 `/usr/local/sbin/isiloka-activate`. Run `isiloka-activate --check` to verify
 prerequisites without changing files or restarting services. CI performs this
-check before building/uploading and stops when restoration is incomplete.
+check before building/uploading and stops when initialization is incomplete.
 
 ## Releases
 

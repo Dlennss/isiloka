@@ -72,7 +72,7 @@ class DeploymentPreflightTests(unittest.TestCase):
 
     def test_missing_backend_stops_before_health_checks(self):
         result, _, opener, _ = self.check(inactive='isiloka-be')
-        self.assertIn('Restore the database/backend', str(result))
+        self.assertIn('Initialize the database/backend', str(result))
         opener.open.assert_not_called()
 
     def test_wrong_architecture_stops_before_service_checks(self):

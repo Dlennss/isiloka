@@ -79,7 +79,7 @@ jobs:
           printf '%s\n' "$SERVER_SSH_KEY" | tr -d '\r' > "$HOME/.ssh/isiloka_deploy"
           ssh-keygen -y -P '' -f "$HOME/.ssh/isiloka_deploy" > /dev/null
 
-      - name: Check restored services before building or uploading
+      - name: Check initialized services before building or uploading
         shell: bash
         run: |
           set -euo pipefail

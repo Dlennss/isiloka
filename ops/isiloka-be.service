@@ -1,0 +1,25 @@
+[Unit]
+Description=Isiloka API
+After=network-online.target postgresql.service
+Wants=network-online.target
+Requires=postgresql.service
+
+[Service]
+Type=simple
+User=isiloka
+Group=isiloka
+WorkingDirectory=/var/lib/isiloka
+EnvironmentFile=/etc/isiloka/backend.env
+ExecStart=/home/mitra-p24/hit/Isiloka/deployment/bootstrap/isiloka-api
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+ReadWritePaths=/var/lib/isiloka
+StateDirectory=isiloka
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target
