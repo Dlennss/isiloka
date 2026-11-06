@@ -16,17 +16,17 @@ concurrency:
 jobs:
   deploy:
     name: Build and Deploy to Server
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-24.04
     if: github.ref == 'refs/heads/main'
 
     env:
       SERVER_HOST: ${{ secrets.SERVER_HOST }}
       SERVER_PORT: ${{ secrets.SERVER_PORT }}
       SERVER_USER: ${{ secrets.SERVER_USER }}
-      SERVER_PASSWORD: ${{ secrets.SERVER_PASSWORD }}
-      BACKEND_SOURCE_DIR: pulsa-be
-      FRONTEND_SOURCE_DIR: pulsa-fe
-      FRONTEND_RELEASE_DIR: isiloka/frontend
+      BACKEND_SOURCE_DIR: ${{ secrets.BACKEND_SOURCE_DIR || 'pulsa-be' }}
+      FRONTEND_SOURCE_DIR: ${{ secrets.FRONTEND_SOURCE_DIR || 'pulsa-fe' }}
+      FRONTEND_RELEASE_DIR: ${{ secrets.FRONTEND_RELEASE_DIR || '/home/mitra-p24/hit/Isiloka/deployment/staging/frontend' }}
+      BACKEND_RELEASE_DIR: /home/mitra-p24/hit/Isiloka/deployment/staging/pulsa-be
 
     steps:
       - name: Checkout
@@ -40,7 +40,6 @@ jobs:
             SERVER_HOST
             SERVER_PORT
             SERVER_USER
-            SERVER_PASSWORD
           )
           for name in "${required[@]}"; do
             if [ -z "${!name:-}" ]; then
@@ -48,6 +47,18 @@ jobs:
               exit 1
             fi
           done
+          if [ "$SERVER_HOST" != "103.31.39.97" ] || [ "$SERVER_PORT" != "22" ] || [ "$SERVER_USER" != "root" ]; then
+            echo "::error::Update SERVER_HOST, SERVER_PORT and SERVER_USER for the new Isiloka server."
+            exit 1
+          fi
+          if [ "$BACKEND_SOURCE_DIR" != "pulsa-be" ] || [ "$FRONTEND_SOURCE_DIR" != "pulsa-fe" ]; then
+            echo "::error::Source directories must be pulsa-be and pulsa-fe relative to the repository."
+            exit 1
+          fi
+          if [ "$FRONTEND_RELEASE_DIR" != "/home/mitra-p24/hit/Isiloka/deployment/staging/frontend" ]; then
+            echo "::error::Update FRONTEND_RELEASE_DIR to the new server's dedicated staging directory (see ops/DEPLOY.md)."
+            exit 1
+          fi
           if [ ! -f "${BACKEND_SOURCE_DIR}/go.sum" ]; then
             echo "::error::BACKEND_SOURCE_DIR must point to the backend folder in this repository, for example: pulsa-be"
             exit 1
@@ -56,6 +67,36 @@ jobs:
             echo "::error::FRONTEND_SOURCE_DIR must point to the frontend folder in this repository, for example: pulsa-fe"
             exit 1
           fi
+
+      - name: Install SSH tools
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update
+          sudo apt-get install -y openssh-client rsync
+
+      - name: Configure deployment SSH key
+        env:
+          SERVER_SSH_KEY: ${{ secrets.SERVER_SSH_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "$SERVER_SSH_KEY" ]; then
+            echo "::error::Add SERVER_SSH_KEY. The new server does not accept SSH passwords."
+            exit 1
+          fi
+          install -d -m 700 "$HOME/.ssh"
+          umask 077
+          printf '%s\n' "$SERVER_SSH_KEY" | tr -d '\r' > "$HOME/.ssh/isiloka_deploy"
+          ssh-keygen -y -P '' -f "$HOME/.ssh/isiloka_deploy" > /dev/null
+
+      - name: Check restored services before building or uploading
+        shell: bash
+        run: |
+          set -euo pipefail
+          ssh -i "$HOME/.ssh/isiloka_deploy" -p "$SERVER_PORT" -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=15 \
+            -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ops/isiloka-known-hosts \
+            "${SERVER_USER}@${SERVER_HOST}" '/usr/local/sbin/isiloka-activate --check'
 
       - name: Setup Go
         uses: actions/setup-go@v5
@@ -78,7 +119,7 @@ jobs:
           cd "$BACKEND_SOURCE_DIR"
           go mod download
           go test ./...
-          CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o ../deploy/backend/isiloka-api .
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o ../deploy/backend/isiloka-api .
 
       - name: Build frontend standalone
         env:
@@ -102,42 +143,30 @@ jobs:
           printf '%s\n' "$GITHUB_SHA" > deploy/frontend/DEPLOY_COMMIT
           printf '%s\n' "$GITHUB_SHA" > deploy/frontend/public/deploy-version.txt
 
-      - name: Install SSH tools
-        shell: bash
-        run: |
-          set -euo pipefail
-          sudo apt-get update
-          sudo apt-get install -y sshpass rsync
-
       - name: Upload release files
         shell: bash
-        env:
-          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
         run: |
           set -euo pipefail
-          SSH_OPTS="-p ${SERVER_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          BACKEND_RELEASE_DIR="isiloka/${BACKEND_SOURCE_DIR}"
+          SSH_OPTS="-i $HOME/.ssh/isiloka_deploy -p ${SERVER_PORT} -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ops/isiloka-known-hosts"
 
-          sshpass -e ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" \
+          ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" \
             "set -e;
-             mkdir -p \"\$HOME/${BACKEND_RELEASE_DIR}\";
-             mkdir -p \"\$HOME/${FRONTEND_RELEASE_DIR}\""
+             mkdir -p \"${BACKEND_RELEASE_DIR}\";
+             mkdir -p \"${FRONTEND_RELEASE_DIR}\""
 
-          sshpass -e rsync -az --delete -e "ssh ${SSH_OPTS}" \
-            deploy/frontend/ "${SERVER_USER}@${SERVER_HOST}:~/${FRONTEND_RELEASE_DIR}/"
+          rsync -az --delete -e "ssh ${SSH_OPTS}" \
+            deploy/frontend/ "${SERVER_USER}@${SERVER_HOST}:${FRONTEND_RELEASE_DIR}/"
 
-          sshpass -e rsync -az -e "ssh ${SSH_OPTS}" \
-            deploy/backend/isiloka-api "${SERVER_USER}@${SERVER_HOST}:~/${BACKEND_RELEASE_DIR}/isiloka-api"
+          rsync -az -e "ssh ${SSH_OPTS}" \
+            deploy/backend/isiloka-api "${SERVER_USER}@${SERVER_HOST}:${BACKEND_RELEASE_DIR}/isiloka-api"
 
       - name: Activate Isiloka and verify services
         shell: bash
-        env:
-          SSHPASS: ${{ secrets.SERVER_PASSWORD }}
         run: |
           set -euo pipefail
-          SSH_OPTS="-p ${SERVER_PORT} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
-          sshpass -e ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" \
-            'sudo -n /usr/local/sbin/isiloka-activate'
+          SSH_OPTS="-i $HOME/.ssh/isiloka_deploy -p ${SERVER_PORT} -o BatchMode=yes -o IdentitiesOnly=yes -o ConnectTimeout=15 -o StrictHostKeyChecking=yes -o UserKnownHostsFile=ops/isiloka-known-hosts"
+          ssh ${SSH_OPTS} "${SERVER_USER}@${SERVER_HOST}" \
+            '/usr/local/sbin/isiloka-activate'
 
       - name: Verify public release
         shell: bash
@@ -145,3 +174,8 @@ jobs:
           set -euo pipefail
           actual=$(curl --fail --silent --show-error --retry 5 --retry-delay 3 "https://isiloka.com/deploy-version.txt?commit=${GITHUB_SHA}")
           test "$actual" = "$GITHUB_SHA"
+
+      - name: Remove deployment key from runner
+        if: always()
+        shell: bash
+        run: rm -f "$HOME/.ssh/isiloka_deploy"

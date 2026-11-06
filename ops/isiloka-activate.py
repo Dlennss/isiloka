@@ -3,14 +3,16 @@
 import fcntl
 import os
 from pathlib import Path
+import platform
 import re
 import shutil
 import subprocess
+import sys
 import time
 import urllib.request
 
-BASE = Path('/var/lib/syslog-ng/fadlanpulsa/deployment/isiloka')
-STAGE = Path('/var/lib/syslog-ng/isiloka')
+BASE = Path('/home/mitra-p24/hit/Isiloka/deployment')
+STAGE = BASE / 'staging'
 
 def run(*args):
     subprocess.run(args, check=True)
@@ -18,6 +20,26 @@ def run(*args):
 def fetch(url):
     with urllib.request.build_opener(urllib.request.ProxyHandler({})).open(url, timeout=5) as r:
         return r.read().decode()
+
+def preflight():
+    if platform.machine() != 'x86_64':
+        raise SystemExit('Expected Linux x86_64 server')
+    for unit in ['isiloka-web', 'isiloka-be']:
+        state = subprocess.run(['systemctl', 'is-active', '--quiet', unit])
+        if state.returncode:
+            raise SystemExit('Restore the database/backend and start ' + unit + ' before deploying')
+    for name in ['frontend.env', 'backend.env']:
+        if not (Path('/etc/isiloka') / name).is_file():
+            raise SystemExit('Missing server environment: ' + name)
+    fetch('http://127.0.0.1:8102/health')
+    fetch('http://127.0.0.1:33128/')
+
+if sys.argv[1:] not in ([], ['--check']):
+    raise SystemExit('Usage: isiloka-activate [--check]')
+preflight()
+if sys.argv[1:] == ['--check']:
+    print('Isiloka deployment prerequisites OK')
+    raise SystemExit(0)
 
 with open('/run/lock/isiloka-deploy.lock', 'w') as lock:
     fcntl.flock(lock, fcntl.LOCK_EX)
@@ -29,18 +51,19 @@ with open('/run/lock/isiloka-deploy.lock', 'w') as lock:
             raise SystemExit('Incomplete frontend: ' + name)
     binary = STAGE / 'pulsa-be/isiloka-api'
     header = binary.read_bytes()[:20]
-    if header[:4] != b'\x7fELF' or header[18:20] != b'\xb7\x00':
-        raise SystemExit('Backend must be Linux ARM64')
+    if header[:6] != b'\x7fELF\x02\x01' or header[18:20] != b'\x3e\x00':
+        raise SystemExit('Backend must be Linux AMD64')
     release = BASE / 'releases' / ('ci-' + commit[:12] + '-' + str(time.time_ns()))
-    release.mkdir(mode=0o755)
+    release.mkdir(mode=0o755, parents=True)
     frontend = release / 'frontend'
     shutil.copytree(STAGE / 'frontend', frontend, symlinks=True,
                     ignore=shutil.ignore_patterns('.env', '.env.*'))
     shutil.copyfile(binary, release / 'isiloka-api')
     os.chmod(release / 'isiloka-api', 0o755)
     (frontend / '.next/cache').mkdir(exist_ok=True)
+    run('chown', '-R', 'isiloka:isiloka', str(frontend / '.next/cache'))
     units = {
-        'isiloka-fe': '[Service]\nWorkingDirectory=' + str(frontend) + '\nBindPaths=\nBindPaths=/var/cache/isiloka-fe:' + str(frontend / '.next/cache') + '\n',
+        'isiloka-web': '[Service]\nWorkingDirectory=' + str(frontend) + '\n',
         'isiloka-be': '[Service]\nExecStart=\nExecStart=' + str(release / 'isiloka-api') + '\n',
     }
     previous = {}
@@ -51,12 +74,12 @@ with open('/run/lock/isiloka-deploy.lock', 'w') as lock:
             dropin.parent.mkdir(exist_ok=True)
             dropin.write_text(content)
         run('systemctl', 'daemon-reload')
-        run('systemctl', 'restart', 'isiloka-be', 'isiloka-fe')
+        run('systemctl', 'restart', 'isiloka-be', 'isiloka-web')
         for attempt in range(30):
             try:
                 fetch('http://127.0.0.1:8102/health')
-                actual = fetch('http://172.22.0.1:33028/deploy-version.txt').strip()
-                fetch('http://172.22.0.1:33028/')
+                actual = fetch('http://127.0.0.1:33128/deploy-version.txt').strip()
+                fetch('http://127.0.0.1:33128/')
                 if actual == commit:
                     print('Isiloka active: ' + commit, flush=True)
                     break
@@ -72,5 +95,5 @@ with open('/run/lock/isiloka-deploy.lock', 'w') as lock:
             else:
                 dropin.write_bytes(old)
         run('systemctl', 'daemon-reload')
-        run('systemctl', 'restart', 'isiloka-be', 'isiloka-fe')
+        run('systemctl', 'restart', 'isiloka-be', 'isiloka-web')
         raise

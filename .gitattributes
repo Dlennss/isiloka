@@ -1,0 +1,4 @@
+ops/*.py text eol=lf
+ops/*.sh text eol=lf
+ops/isiloka-known-hosts text eol=lf
+.github/workflows/*.yml text eol=lf

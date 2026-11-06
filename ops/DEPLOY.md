@@ -1,27 +1,61 @@
 # Isiloka deployment
 
-GitHub Actions builds Linux ARM64 artifacts and uploads using SERVER_HOST,
-SERVER_PORT, SERVER_USER and SERVER_PASSWORD secrets. Source folders are
-pulsa-fe and pulsa-be relative to the checkout, not absolute server paths.
+Target: `103.31.39.97`, Linux x86_64. GitHub Actions builds AMD64 artifacts.
+Repository Actions secrets must contain:
 
-The syslog-ng SSH account has home /var/lib/syslog-ng, which is root-owned.
-The server administrator must provision only ~/isiloka and its frontend and
-pulsa-be subdirectories with ownership syslog-ng:syslog-ng and mode 0755.
-Do not change ownership of the entire home or shared application directory.
+| Secret | Value |
+| --- | --- |
+| SERVER_HOST | `103.31.39.97` |
+| SERVER_PORT | `22` |
+| SERVER_USER | `root` |
+| SERVER_SSH_KEY | Dedicated deployment private key, including BEGIN/END lines |
+| BACKEND_SOURCE_DIR | `pulsa-be` |
+| FRONTEND_SOURCE_DIR | `pulsa-fe` |
+| FRONTEND_RELEASE_DIR | `/home/mitra-p24/hit/Isiloka/deployment/staging/frontend` |
 
-Staging:
-- ~/isiloka/frontend
-- ~/isiloka/pulsa-be/isiloka-api
+Source directories are relative to the repository checkout. The release directory
+is an absolute, dedicated staging path on the server, not the live frontend.
+The workflow rejects different paths before any rsync deletion can run.
+Folder secrets have defaults; remove obsolete values or replace them with the
+values above. `SERVER_PASSWORD` is no longer used: the server disables password
+authentication. Remove that obsolete secret after configuring `SERVER_SSH_KEY`.
+Never commit private keys, passwords or production environment files.
 
-Install ops/isiloka-activate.py as root-owned mode 0755
-/usr/local/sbin/isiloka-activate. Allow syslog-ng to run only this no-argument
-command with passwordless sudo. The helper expects the existing isiloka-fe and
-isiloka-be systemd units and their separate server-owned environment files.
-It snapshots both artifacts into deployment/isiloka/releases, switches only
-these two services, and rolls back if local health/version checks fail.
-The deployment job also verifies the exact commit through the public domain.
+The matching public key must be installed in root's `authorized_keys`. Use a
+dedicated deployment key, not a personal administrator's private key. This
+workflow requires root for systemd activation; keep the private key restricted
+to this repository's trusted deployment workflow.
 
-Frontend listens on 172.22.0.1:33028; backend on 127.0.0.1:8102.
-Nginx Proxy Manager routes isiloka.com to the frontend. Production environment
-files stay under /var/lib/syslog-ng/fadlanpulsa/deployment/isiloka; never upload
-or commit them. Do not point another application's deployment at these paths.
+`ops/isiloka-known-hosts` pins the new server's previously trusted public SSH key.
+If that key changes, verify the replacement through the server console before
+updating this file. Do not disable host verification.
+
+## Restore before deploying
+
+Restore the old Isiloka database first. Do not create a replacement empty account
+database. Provision `/etc/isiloka/backend.env` and `/etc/isiloka/frontend.env`
+and the `isiloka-be` and `isiloka-web` services. The backend must listen on
+`127.0.0.1:8102` and the frontend on `127.0.0.1:33128`.
+
+Install `ops/isiloka-activate.py` as root-owned mode 0755 at
+`/usr/local/sbin/isiloka-activate`. Run `isiloka-activate --check` to verify
+prerequisites without changing files or restarting services. CI performs this
+check before building/uploading and stops when restoration is incomplete.
+
+## Releases
+
+Artifacts are uploaded to `/home/mitra-p24/hit/Isiloka/deployment/staging`:
+
+- `frontend/`: complete Next.js standalone build, public and static files.
+- `pulsa-be/isiloka-api`: Linux AMD64 backend binary.
+
+Activation snapshots artifacts under `deployment/releases`, changes only the
+Isiloka systemd release overrides, and restarts both Isiloka services. Failed
+local health/version checks restore the previous overrides. CI also checks the
+public commit marker at `https://isiloka.com/deploy-version.txt`.
+
+Deployment does not restore databases, run SQL migrations, change balances,
+replace server secrets, or modify nginx/other applications. Database restoration
+and catalogue import are separate operations with separate backups.
+
+GitHub secret setup: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets
