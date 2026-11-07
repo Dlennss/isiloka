@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"fmt"
 	"net/url"
 	"strconv"
 	"strings"
@@ -212,11 +211,17 @@ func (s *ProviderCallbackService) processPulsa24JamRetailWithdrawCallback(ctx co
 }
 
 func (s *ProviderCallbackService) processPulsa24JamAppCallback(ctx context.Context, data pulsa24JamCallbackData, row *repository.AppOrderProviderTrxRow) (int, map[string]any) {
+	unlock := lockProviderCallback(row.AppOrderID)
+	defer unlock()
 	order, err := s.appOrderRepo.GetByID(ctx, row.AppOrderID)
 	if err != nil || order == nil {
 		return 200, map[string]any{"ok": true, "refid": data.refid, "ignored": true}
 	}
 	finalStatus := pulsa24JamFinalStatus(data)
+	if order.Status == "success" || order.Status == "failed" || order.Status == "refunded" {
+		helper.AppendAlreadyFinalLog("callback already_final provider=pulsa24jam refid=%s app_order_id=%d status=%s callback_status=%s", data.refid, order.ID, order.Status, finalStatus)
+		return 200, map[string]any{"ok": true, "already_final": true, "refid": data.refid}
+	}
 	rawJSON, _ := json.Marshal(data.payload)
 	updateIn := repository.AppOrderProviderTrxUpdateInput{
 		ID:          row.ID,
@@ -231,11 +236,7 @@ func (s *ProviderCallbackService) processPulsa24JamAppCallback(ctx context.Conte
 	}
 	if err := s.appProviderRepo.UpdateResult(ctx, updateIn); err != nil {
 		helper.AppendProviderServiceLog("provider_callback_service.log", "pulsa24jam app callback update failed refid=%s app_provider_id=%d err=%v", data.refid, row.ID, err)
-	}
-
-	if order.Status == "success" || order.Status == "failed" || order.Status == "refunded" {
-		helper.AppendAlreadyFinalLog("callback already_final provider=pulsa24jam refid=%s app_order_id=%d status=%s callback_status=%s", data.refid, order.ID, order.Status, finalStatus)
-		return 200, map[string]any{"ok": true, "already_final": true, "refid": data.refid}
+		return 500, map[string]any{"ok": false, "message": "gagal menyimpan status provider"}
 	}
 	if finalStatus == "pending" {
 		_ = s.appOrderRepo.UpdateStatusByID(ctx, order.ID, "processing_provider")
@@ -256,7 +257,9 @@ func (s *ProviderCallbackService) processPulsa24JamAppCallback(ctx context.Conte
 				helper.AppendProviderServiceLog("provider_wallet.log", "provider wallet debit app failed provider=pulsa24jam refid=%s app_provider_id=%d err=%v", data.refid, row.ID, err)
 			}
 		}
-		_ = s.appOrderRepo.UpdateStatusByID(ctx, order.ID, "success")
+		if err := s.appOrderRepo.UpdateStatusByID(ctx, order.ID, "success"); err != nil {
+			return 500, map[string]any{"ok": false, "message": "gagal menyimpan status order"}
+		}
 		if s.retailRepo != nil {
 			if err := s.retailRepo.ApplyCommissionForOrder(ctx, order.ID); err != nil {
 				helper.AppendProviderServiceLog("provider_wallet.log", "retail commission apply failed invoice=%s order_id=%d err=%v", data.refid, order.ID, err)
@@ -300,12 +303,8 @@ func parsePulsa24JamCallback(raw string, q url.Values, payload map[string]any) p
 			if v := strings.TrimSpace(q.Get(key)); v != "" {
 				return v
 			}
-			for k, rawValue := range payload {
-				if strings.EqualFold(strings.TrimSpace(k), key) {
-					if v := strings.TrimSpace(fmt.Sprint(rawValue)); v != "" && v != "<nil>" {
-						return v
-					}
-				}
+			if v := helper.Pulsa24JamResponseField(payload, key); v != "" {
+				return v
 			}
 		}
 		return ""

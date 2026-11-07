@@ -4,7 +4,27 @@ import (
 	"testing"
 
 	"pulsa2/internal/provider"
+	"pulsa2/internal/repository"
 )
+
+func TestPulsa24JamEWalletAllowlist(t *testing.T) {
+	items := []repository.Pulsa24JamCatalogItem{
+		{SKU: "PPOBDANA", CategoryName: "E-Wallet", Price: 1000},
+		{SKU: "GOPAY", CategoryName: "E-Wallet", Price: 1200},
+		{SKU: "GPC4P", CategoryName: "E-Wallet", Price: 1200},
+		{SKU: "PULSA10", CategoryName: "Pulsa", Price: 11000},
+	}
+	got := filterPulsa24JamEWalletCatalog(items, " PPOBDANA, GOPAY ")
+	if len(got) != 3 || got[0] != items[0] || got[1] != items[1] || got[2] != items[3] {
+		t.Fatalf("allowlist changed pricing or other categories: %+v", got)
+	}
+	if got := filterPulsa24JamEWalletCatalog(items, ""); len(got) != len(items) {
+		t.Fatal("empty policy must preserve the catalogue")
+	}
+	if got := filterPulsa24JamEWalletCatalog(items, "UNKNOWN"); len(got) != 1 || got[0].SKU != "PULSA10" {
+		t.Fatal("unknown allowed SKU must not enable other wallets")
+	}
+}
 
 func TestPulsa24JamCatalogItemFromProductKeepsUpstreamCatalog(t *testing.T) {
 	price := int64(12500)

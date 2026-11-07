@@ -55,9 +55,26 @@ func pulsa24JamJSONField(body, key string) string {
 	if err := json.Unmarshal([]byte(body), &payload); err != nil {
 		return ""
 	}
+	return Pulsa24JamResponseField(payload, key)
+}
+
+// H2HR PAY responses wrap the authoritative result in transaksi_member.
+func Pulsa24JamResponseField(payload map[string]any, key string) string {
+	if transaction, ok := payload["transaksi_member"].(map[string]any); ok {
+		if value := pulsa24JamScalarField(transaction, key); value != "" {
+			return value
+		}
+	}
+	return pulsa24JamScalarField(payload, key)
+}
+
+func pulsa24JamScalarField(payload map[string]any, key string) string {
 	for k, v := range payload {
 		if strings.EqualFold(strings.TrimSpace(k), key) {
-			return strings.TrimSpace(fmt.Sprint(v))
+			switch v.(type) {
+			case string, float64, json.Number, bool, int, int64:
+				return strings.TrimSpace(fmt.Sprint(v))
+			}
 		}
 	}
 	return ""

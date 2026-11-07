@@ -1,5 +1,6 @@
 """Read-only comparison of the app catalogue against a captured H2HR response."""
 import json
+import os
 import sys
 import urllib.request
 
@@ -15,6 +16,10 @@ def fetch(path):
     return result["items"]
 
 expected = {p["sku"]: p for p in upstream["items"] if p.get("aktif", True)}
+wallet_policy = os.environ.get("PULSA24JAM_EWALLET_ALLOWED_SKUS", "").strip()
+if wallet_policy:
+    allowed = {sku.strip() for sku in wallet_policy.split(",") if sku.strip()}
+    expected = {sku: p for sku, p in expected.items() if p["kategori_nama"].strip().lower() != "e-wallet" or sku in allowed}
 products = fetch("/v1/app/produk")
 actual = {p["sku"]: p for p in products}
 assert len(actual) == len(products), "Duplicate app SKU"

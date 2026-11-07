@@ -3,14 +3,20 @@ package service
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"pulsa2/internal/provider"
 	"pulsa2/internal/repository"
 )
 
 type Pulsa24JamCatalogSyncService struct {
-	repo   *repository.Pulsa24JamCatalogRepository
-	client *provider.Pulsa24JamAdapter
+	repo             *repository.Pulsa24JamCatalogRepository
+	client           *provider.Pulsa24JamAdapter
+	ewalletAllowlist string
+}
+
+func (s *Pulsa24JamCatalogSyncService) SetEWalletAllowlist(value string) {
+	s.ewalletAllowlist = value
 }
 
 func NewPulsa24JamCatalogSyncService(dbRepo *repository.Pulsa24JamCatalogRepository, client *provider.Pulsa24JamAdapter) *Pulsa24JamCatalogSyncService {
@@ -35,7 +41,26 @@ func (s *Pulsa24JamCatalogSyncService) Sync(ctx context.Context) (*repository.Pu
 		item.Price = price
 		items = append(items, item)
 	}
-	return s.repo.Sync(ctx, items)
+	return s.repo.Sync(ctx, filterPulsa24JamEWalletCatalog(items, s.ewalletAllowlist))
+}
+
+func filterPulsa24JamEWalletCatalog(items []repository.Pulsa24JamCatalogItem, allowlist string) []repository.Pulsa24JamCatalogItem {
+	if strings.TrimSpace(allowlist) == "" {
+		return items
+	}
+	allowed := make(map[string]bool)
+	for _, sku := range strings.Split(allowlist, ",") {
+		if sku = strings.TrimSpace(sku); sku != "" {
+			allowed[sku] = true
+		}
+	}
+	filtered := make([]repository.Pulsa24JamCatalogItem, 0, len(items))
+	for _, item := range items {
+		if !strings.EqualFold(strings.TrimSpace(item.CategoryName), "E-Wallet") || allowed[item.SKU] {
+			filtered = append(filtered, item)
+		}
+	}
+	return filtered
 }
 
 func pulsa24JamCatalogItemFromProduct(product provider.Pulsa24JamProduct) repository.Pulsa24JamCatalogItem {

@@ -121,6 +121,21 @@ func TestProviderResponseStateOfPulsa24Jam(t *testing.T) {
 		want ProviderResponseState
 	}{
 		{
+			name: "nested successful H2HR transaction with receipt but no success word",
+			msg:  `{"ok":true,"transaksi_member":{"ref_id":"PKATEST","status":2,"keterangan":"NAMA:TEST,NOMINAL:20000,REFF:123"}}`,
+			want: ProviderResponseSuccess,
+		},
+		{
+			name: "nested pending transaction",
+			msg:  `{"ok":true,"transaksi_member":{"status":1,"keterangan":"Sedang diproses"}}`,
+			want: ProviderResponsePending,
+		},
+		{
+			name: "nested failed transaction despite accepted envelope",
+			msg:  `{"ok":true,"transaksi_member":{"status":3}}`,
+			want: ProviderResponseFailed,
+		},
+		{
 			name: "ok true accepted is pending",
 			msg:  `{"ok":true,"refid":"PKA29","status":1,"message":"Transaksi sedang diproses"}`,
 			want: ProviderResponsePending,

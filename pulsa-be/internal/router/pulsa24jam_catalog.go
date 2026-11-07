@@ -26,6 +26,7 @@ func startPulsa24JamCatalogSync(db *sql.DB, client *provider.Pulsa24JamAdapter) 
 		}
 	}
 	syncService := service.NewPulsa24JamCatalogSyncService(repository.NewPulsa24JamCatalogRepository(db), client)
+	syncService.SetEWalletAllowlist(os.Getenv("PULSA24JAM_EWALLET_ALLOWED_SKUS"))
 	run := func() {
 		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Minute)
 		defer cancel()

@@ -71,4 +71,17 @@ Deployment does not restore databases, run SQL migrations, change balances,
 replace server secrets, or modify nginx/other applications. Database restoration
 and catalogue import are separate operations with separate backups.
 
+## E-Wallet Availability
+
+`PULSA24JAM_EWALLET_ALLOWED_SKUS=PPOBDANA,GOPAY` in the backend environment
+restricts E-Wallet availability to these verified SKUs on every catalogue sync.
+Other categories are unchanged. Omitted products are disabled, not deleted;
+their transaction history remains intact. An empty value restores the complete
+upstream E-Wallet catalogue. Pass the same variable to the catalogue audit.
+
+The P24 callback must authenticate with `X-Callback-Token` matching
+`PULSA24JAM_CALLBACK_TOKEN`, or with the same token in the callback URL's `token`
+query parameter. Keep this credential private. Never disable authentication to
+work around HTTP 401, and never resend PAY to reconcile a delivered order.
+
 GitHub secret setup: https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-secrets

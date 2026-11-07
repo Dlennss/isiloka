@@ -10,6 +10,8 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
   const wallet = categories.find((item) => item.nama === 'E-Wallet');
   const brands = (await (await fetch(`${api}/v1/app/brand?kategori_id=${wallet.id}`)).json()).items;
   const dana = brands.find((item) => item.nama === 'DANA');
+  const danaProducts = (await (await fetch(`${api}/v1/app/produk?kategori_id=${wallet.id}&brand_id=${dana.id}`)).json()).items;
+  const danaSKU = danaProducts.some((item) => item.sku === 'PPOBDANA') ? 'PPOBDANA' : 'DANA';
   const browser = await chromium.launch({ channel: 'chrome', headless: true });
   try {
     for (const width of [390, 1280, 320]) {
@@ -35,15 +37,18 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
       await page.screenshot({ path: path.join(os.tmpdir(), `isiloka-providers-${width}.png`), fullPage: true });
       await page.goto(`${base}/kategori/${wallet.id}/brand/${dana.id}`, { waitUntil: 'networkidle', timeout: 120000 });
       await page.getByRole('textbox', { name: 'Cari nama atau SKU' }).fill('DANA');
-      const buy = page.getByRole('button', { name: 'Top Up DANA', exact: true });
+      const buy = page.getByRole('button', { name: `Top Up ${danaSKU}`, exact: true });
       await buy.waitFor();
       assert.match(await buy.locator('..').innerText(), /Biaya tambahan\s+Rp 1\.000/);
       const cards = page.locator('article');
       const first = await cards.nth(0).boundingBox();
-      const second = await cards.nth(1).boundingBox();
-      assert.equal(first.y, second.y, 'wallet cards must share a two-column row');
-      assert.ok(second.x >= first.x + first.width, 'wallet cards must not overlap');
-      assert.ok(Math.abs(first.height - second.height) < 1, 'wallet cards must have equal heights');
+      assert.equal(await cards.first().locator('..').evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(' ').length), 2);
+      if (await cards.count() > 1) {
+        const second = await cards.nth(1).boundingBox();
+        assert.equal(first.y, second.y, 'wallet cards must share a two-column row');
+        assert.ok(second.x >= first.x + first.width, 'wallet cards must not overlap');
+        assert.ok(Math.abs(first.height - second.height) < 1, 'wallet cards must have equal heights');
+      }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `overflow ${width}`);
       await page.screenshot({ path: path.join(os.tmpdir(), `isiloka-products-${width}.png`), fullPage: true });
       await buy.click();
@@ -55,9 +60,12 @@ const { chromium } = require(process.env.PLAYWRIGHT_MODULE || 'playwright');
       const legacyCards = page.locator('article');
       await legacyCards.first().waitFor();
       const legacyFirst = await legacyCards.nth(0).boundingBox();
-      const legacySecond = await legacyCards.nth(1).boundingBox();
-      assert.equal(legacyFirst.y, legacySecond.y, 'legacy wallet cards must also use two columns');
-      assert.ok(Math.abs(legacyFirst.height - legacySecond.height) < 1);
+      assert.equal(await legacyCards.first().locator('..').evaluate((grid) => getComputedStyle(grid).gridTemplateColumns.split(' ').length), 2);
+      if (await legacyCards.count() > 1) {
+        const legacySecond = await legacyCards.nth(1).boundingBox();
+        assert.equal(legacyFirst.y, legacySecond.y, 'legacy wallet cards must also use two columns');
+        assert.ok(Math.abs(legacyFirst.height - legacySecond.height) < 1);
+      }
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false);
       await legacyCards.first().scrollIntoViewIfNeeded();
       await page.screenshot({ path: path.join(os.tmpdir(), `isiloka-ewallet-legacy-${width}.png`) });
